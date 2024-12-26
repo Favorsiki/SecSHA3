@@ -18,12 +18,12 @@
 ​         In the Vivado, the platform is connected as shown in the following figure.
 
 
-![Diagram Png](E:/workstation/hw-sw_co-design/SecHash/img/diagram.png)
+![Diagram Png](/img/diagram.png)
 
 
 ##### 2.3 compile software
 
-![Diagram Png](E:/workstation/hw-sw_co-design/SecHash/img/compile.png)
+![Diagram Png](/img/compile.png)
 
 
 
@@ -31,7 +31,7 @@
 
 ##### 3.1 Performance
 
-![Diagram Png](E:/workstation/hw-sw_co-design/SecHash/img/performance.png)
+![Diagram Png](/img/performance.png)
 
 
 
