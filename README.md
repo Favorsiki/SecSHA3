@@ -1,2 +1,38 @@
 # SecSHA3
-efficient anti side channel SHA3 algorithm software and hardware co-design. 
+
+### 1. Introduction
+
+​        [MKM4](https://github.com/masked-kyber-m4/mkm4) is an open-source Post-Quantum-Cryptography algorithm library with anti side channel capability. In this work, we provided optimized software and hardware co-design for the SHA-3 algorithm on the Zynq-7020 SoC, improving the performance of MKM4 through hardware acceleration and software optimization while ensuring a certain level of anti side channel security. On the hardware side, we adopt a unified high-level architecture to summarize the different characteristics of the SHA-3 algorithm series, and design a dedicated keccak-f hardware accelerator to expand different security requirements. On the software side, we use command words to program hardware accelerators and use DMA technology to reduce performance degradation caused by communication overhead.
+​        Combining these acceleration and optimization methods, experimental results show that the overall performance of the  SHA-3 algorithm in MKM4 project on the ARM has improved by 13.7 times, and the overall performance of the MKM4 project has increased by 2.2 times.
+
+### 2. How to use
+
+##### 2.1 environment
+
+- Zynq-7000 SoC
+- Vivado 2022.1
+- Vitis 2022.1
+
+##### 2.2 synthesize accelerator
+
+​         In the Vivado, the platform is connected as shown in the following figure.
+
+
+![Diagram Png](E:/workstation/hw-sw_co-design/SecHash/img/diagram.png)
+
+
+##### 2.3 compile software
+
+![Diagram Png](E:/workstation/hw-sw_co-design/SecHash/img/compile.png)
+
+
+
+### 3. Test
+
+##### 3.1 Performance
+
+![Diagram Png](E:/workstation/hw-sw_co-design/SecHash/img/performance.png)
+
+
+
+
