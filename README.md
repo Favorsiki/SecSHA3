@@ -13,7 +13,11 @@
 - Vivado 2022.1
 - Vitis 2022.1
 
-##### 2.2 synthesize accelerator
+##### 2.2 Design Rationale
+
+![Design Png](/img/architecture.png)
+
+##### 2.3 synthesize accelerator (PL)
 
 ​         In the Vivado, the platform is connected as shown in the following figure.
 
@@ -21,7 +25,7 @@
 ![Diagram Png](/img/diagram.png)
 
 
-##### 2.3 compile software
+##### 2.4 compile software (PS)
 
 ![Diagram Png](/img/compile.png)
 
