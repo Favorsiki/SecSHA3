@@ -1,247 +1,276 @@
+`timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// company: 
-// engineer: 
+// Company: 
+// Engineer: 
 // 
-// create date: 2023/01/06 17:29:46
-// design name: 
-// module name: keccak1600
-// project name: 
-// target devices: 
-// tool versions: 
-// description: 
+// Create Date: 2023/01/06 17:29:46
+// Design Name: 
+// Module Name: keccak1600
+// Project Name: 
+// Target Devices: 
+// Tool Versions: 
+// Description: 
 // 
-// dependencies: 
-// 
-// revision:
-// revision 0.01 - file created
-// additional comments:
+// Dependencies: 
+//  
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
-
+// 2022-11-17 11:04
+// 2022-12-21 14:05
+// 2023-01-03 15:11
+// 2023-02-13 10:17
 module keccak1600 (
-    input           clk,
-    input           reset,
-    input           init,
-    input           go,
-    input           squeeze,
-    input           absorb,
-    input           extend,
-    input    [31:0] din_0, din_1,
-    input  [1599:0] rand_data,
-    output          done,
-    output   [31:0] result_0, result_1
+    input           CLK,
+    input           RESET,
+    input           INIT,
+    input           GO,
+    input           SQUEEZE,
+	input 			IN_READY,
+    input           ABSORB,
+    input           EXTEND,
+    input   [31:0]  DIN_0, DIN_1,
+    output          DONE,
+    output  [31:0]  RESULT_0, RESULT_1
 );
 
-     wire    reset_rf, enable_rf, done_intern;
-     wire    [63:0]   iota_const;
-    wire    [1599:0] reorder_out_0, reorder_out_1;
-    // reg     [1599:0] state_result_0, state_result_1;  //there are tow reg variables, adapt the ram ip to replace them
-    assign result_0 = reorder_out_0[31:0];
-    assign result_1 = reorder_out_1[31:0];
-    assign done = done_intern;
+    wire    RESET_RF, ENABLE_RF, DONE_INTERN;
+    wire    [63:0]   CONST;
+    wire    [1599:0] REORDER_OUT_0, REORDER_OUT_1;
+	reg 	[1599:0] STATE_RESULT_0, STATE_RESULT_1;
+    assign RESULT_0 = STATE_RESULT_0[1599:1568];
+    assign RESULT_1 = STATE_RESULT_1[1599:1568];
+    assign DONE = DONE_INTERN;
+	
+	always @(posedge CLK) begin
+		if (RESET) begin STATE_RESULT_0 <= 0; STATE_RESULT_1 <= 0; end 
+		else if (DONE_INTERN) begin STATE_RESULT_0 <= REORDER_OUT_0; STATE_RESULT_1 <= REORDER_OUT_1; end 
+		else if (SQUEEZE) begin STATE_RESULT_0 <= {STATE_RESULT_0[1567:0], STATE_RESULT_0[1599:1568]}; STATE_RESULT_1 <= {STATE_RESULT_1[1567:0], STATE_RESULT_1[1599:1568]}; end 
+		else begin STATE_RESULT_0 <= STATE_RESULT_0; STATE_RESULT_1 <= STATE_RESULT_1; end 
+	end 
 
-    round rnd(.clk(clk), .reset(reset_rf), .init(init), .enable(enable_rf), .squeeze(squeeze), .absorb(absorb), .extend(extend), .iota_const(iota_const), .din_0(din_0), .din_1(din_1), .output_0(reorder_out_0), .output_1(reorder_out_1), .rand_data(rand_data));
-    statemachine fsm(.clk(clk), .reset(reset), .init(init), .go(go), .done(done_intern), .reset_rf(reset_rf), .enable_rf(enable_rf), .iota_const(iota_const));
+    Round rnd(.CLK(CLK), .RESET(RESET_RF), .INIT(INIT), .ENABLE(ENABLE_RF), .IN_READY(IN_READY), .ABSORB(ABSORB), .EXTEND(EXTEND), .CONST(CONST), .DIN_0(DIN_0), .DIN_1(DIN_1), .OUTPUT_0(REORDER_OUT_0), .OUTPUT_1(REORDER_OUT_1));
+    StateMachine fsm(.CLK(CLK), .RESET(RESET), .INIT(INIT), .GO(GO), .DONE(DONE_INTERN), .RESET_RF(RESET_RF), .ENABLE_RF(ENABLE_RF), .CONST(CONST));
 
 endmodule
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-module round (
-    input           clk,
-    input           reset,
-    input           init,
-    input           enable,
-    input           squeeze,
-    input           absorb,
-    input           extend,
-    input  [63:0]   iota_const,
-    input  [31:0]   din_0, din_1,
-    input  [1599:0] rand_data,
-    output [1599:0] output_0, output_1
+`define low_pos(w,b)      ((w)*64 + (b)*8)
+`define low_pos2(w,b)     `low_pos(w,7-b)
+`define high_pos(w,b)     (`low_pos(w,b) + 7)
+`define high_pos2(w,b)    (`low_pos2(w,b) + 7)
+
+module Round (
+    input           CLK,
+    input           RESET,
+    input           INIT,
+    input           ENABLE,
+    input           IN_READY,
+    input           ABSORB,
+    input           EXTEND,
+    input   [63:0]  CONST,
+    input   [31:0]  DIN_0, DIN_1,
+    output  [1599:0] OUTPUT_0, OUTPUT_1
 );
 
-    wire [1599:0] state [0:1];
-    wire [1599:0] tmp1 [0:1];
-    wire [1599:0] tmp2 [0:1];
-    wire [1599:0] tmp3 [0:1];
-    wire [1599:0] tmp4 [0:1];
+    wire    [1599:0] MUX_0, STATE_0, TMP1_0, TMP2_0, TMP3_0, TMP4_0, TMP5_0, TMP6_0;
+    wire    [1599:0] MUX_1, STATE_1, TMP1_1, TMP2_1, TMP3_1, TMP4_1, TMP5_1, TMP6_1;
 
-    assign output_0 = state[0];
-    assign output_1 = state[1];
+    assign OUTPUT_0 = STATE_0;
+    assign OUTPUT_1 = STATE_1;
 
-    registerfdre reg_0(.clk(clk), .reset(reset), .init(init), .enable(enable), .squeeze(squeeze), .absorb(absorb), .extend(extend), .din(din_0), .d(tmp4[0]), .q(state[0]));
-    registerfdre reg_1(.clk(clk), .reset(reset), .init(init), .enable(enable), .squeeze(squeeze), .absorb(absorb), .extend(extend), .din(din_1), .d(tmp4[1]), .q(state[1]));
-    theta   t0(.x(state[0]),   .y(tmp1[0]));
-    theta   t1(.x(state[1]),   .y(tmp1[1]));
-    rho     r0(.x(tmp1[0]),  .y(tmp2[0]));
-    rho     r1(.x(tmp1[1]),  .y(tmp2[1]));
-    pi      p0(.x(tmp2[0]),  .y(tmp3[0]));
-    pi      p1(.x(tmp2[1]),  .y(tmp3[1]));
-    chi_iota ci(.clk(clk), .rst(reset), .I_iota_const(iota_const), .I_x(tmp3), .I_r(rand_data), .O_z(tmp4)); 
+    RegisterFDRE Reg_0(.CLK(CLK), .RESET(RESET), .INIT(INIT), .ENABLE(ENABLE), .IN_READY(IN_READY), .ABSORB(ABSORB), .EXTEND(EXTEND), .DIN(DIN_0), .D(TMP6_0), .Q(STATE_0));
+    RegisterFDRE Reg_1(.CLK(CLK), .RESET(RESET), .INIT(INIT), .ENABLE(ENABLE), .IN_READY(IN_READY), .ABSORB(ABSORB), .EXTEND(EXTEND), .DIN(DIN_1), .D(TMP6_1), .Q(STATE_1));
+    Theta   T0(.X(MUX_0), 	.Y(TMP1_0));
+    Theta   T1(.X(MUX_1), 	.Y(TMP1_1));
+    Rho     R0(.X(TMP1_0), 	.Y(TMP2_0));
+    Rho     R1(.X(TMP1_1), 	.Y(TMP2_1));
+    Pi      P0(.X(TMP2_0), 	.Y(TMP3_0));
+    Pi      P1(.X(TMP2_1), 	.Y(TMP3_1));
+    Chi     C(.X_0(TMP3_0),	.X_1(TMP3_1), .Y_0(TMP4_0), .Y_1(TMP4_1));
+    Iota    I0(.X(TMP4_0), .C(CONST), .Y(TMP5_0));
+    assign TMP5_1 = TMP4_1;
+	
+
+	genvar w, b;
+	
+    generate
+      for(w=0; w<25; w=w+1)
+        begin  
+          for(b=0; b<8; b=b+1)
+            begin 
+              assign MUX_0[`high_pos(w,b):`low_pos(w,b)] = STATE_0[`high_pos2(w,b):`low_pos2(w,b)];
+              assign MUX_1[`high_pos(w,b):`low_pos(w,b)] = STATE_1[`high_pos2(w,b):`low_pos2(w,b)];
+            end
+        end
+    endgenerate
+
+    generate
+      for(w=0; w<25; w=w+1)
+        begin  
+          for(b=0; b<8; b=b+1)
+            begin  
+              assign TMP6_0[`high_pos(w,b):`low_pos(w,b)] = TMP5_0[`high_pos2(w,b):`low_pos2(w,b)];
+              assign TMP6_1[`high_pos(w,b):`low_pos(w,b)] = TMP5_1[`high_pos2(w,b):`low_pos2(w,b)];
+            end
+        end
+    endgenerate
+	
 endmodule
+
+`undef low_pos
+`undef low_pos2
+`undef high_pos
+`undef high_pos2
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-module registerfdre (
-    input           clk,
-    input           reset,
-    input           init,
-    input           enable,
-    input           squeeze,
-    input           absorb,
-    input           extend,
-    input   [31:0]  din,
-    input   [1599:0] d,
-    output  [1599:0] q
+module RegisterFDRE (
+    input           CLK,
+    input           RESET,
+    input           INIT,
+    input           ENABLE,
+    input           IN_READY,
+    input           ABSORB,
+    input           EXTEND,
+    input   [31:0]  DIN,
+    input   [1599:0] D,
+    output  [1599:0] Q
 );
 
-    wire    [31:0]  din_mux;
-    reg     [1599:0] q_buf;
+    wire    [31:0]  Din_mux;
+    reg     [1599:0] Q_buf;
 
-    assign q = q_buf;
-    assign din_mux = extend ? q_buf[31:0] : (absorb ? q_buf[31:0] ^ din : din);
+    assign Q = Q_buf;
+    assign Din_mux = EXTEND ? Q_buf[1599:1568] : (ABSORB ? Q_buf[1599:1568] ^ DIN : DIN) ;
 
-    always @(posedge clk) begin
-        if (reset) q_buf <= 0;
-        else if (init) q_buf <= 0;
-        else if (squeeze | extend) q_buf <= {din_mux, q_buf[1599:32]};
-        else if (enable) q_buf <= d;
+    always @(posedge CLK) begin
+        if (RESET) Q_buf <= 0;
+        else if (INIT) Q_buf <= 0;
+        else if (IN_READY | EXTEND ) Q_buf <= {Q_buf[1567:0], Din_mux};
+        else if (ENABLE) Q_buf <= D;
     end
 
 endmodule
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-module statemachine (
-    input           clk,
-    input           reset,
-    input           init,
-    input           go,
-    output  reg     done,
-    output  reg     reset_rf,
-    output  reg     enable_rf,
-    output reg [63:0] iota_const
+module StateMachine (
+    input           CLK,
+    input           RESET,
+    input           INIT,
+    input           GO,
+    output  reg     DONE,
+    output  reg     RESET_RF,
+    output  reg     ENABLE_RF,
+    output reg [63:0] CONST
 );
-    `define     s_reset  3'h0
-    `define     s_init   3'h1
-    `define     s_round1 3'h2
-    `define     s_round2 3'h3
-    `define     s_done   3'h4
+    `define     S_RESET 2'h0
+    `define     S_INIT  2'h1
+    `define     S_ROUND 2'h2
+    `define     S_DONE  2'h3
 
-    reg     [2:0]   state, next_state;
-    reg     [7:0]   lfsr;
-    reg             reset_lfsr, enable_lfsr;
+    reg     [1:0]   STATE, NEXT_STATE;
+    reg     [7:0]   LFSR;
+    reg             RESET_LFSR, ENABLE_LFSR;
 
-    always @(posedge clk) begin
-        if (reset_lfsr) lfsr <= 8'h1;
-        else if (enable_lfsr) lfsr <= {lfsr[6:0], (lfsr[7] ^ lfsr[5] ^ lfsr[4] ^ lfsr[3])};
-        else lfsr <= lfsr;
+    always @(posedge CLK) begin
+        if (RESET_LFSR) LFSR <= 8'h1;
+        else if (ENABLE_LFSR) LFSR <= {LFSR[6:0], (LFSR[7] ^ LFSR[5] ^ LFSR[4] ^ LFSR[3])};
+        else LFSR <= LFSR;
     end     
 
-    always @(lfsr) begin 
-        case(lfsr)
-            8'h01  : iota_const <= 64'h0000000000000001;
-            8'h02  : iota_const <= 64'h0000000000008082;
-            8'h04  : iota_const <= 64'h800000000000808a;
-            8'h08  : iota_const <= 64'h8000000080008000;
-            8'h11  : iota_const <= 64'h000000000000808b;
-            8'h23  : iota_const <= 64'h0000000080000001;
-            8'h47  : iota_const <= 64'h8000000080008081;
-            8'h8e  : iota_const <= 64'h8000000000008009;
-            8'h1c  : iota_const <= 64'h000000000000008a;
-            8'h38  : iota_const <= 64'h0000000000000088;
-            8'h71  : iota_const <= 64'h0000000080008009;
-            8'he2  : iota_const <= 64'h000000008000000a;
-            8'hc4  : iota_const <= 64'h000000008000808b;
-            8'h89  : iota_const <= 64'h800000000000008b;
-            8'h12  : iota_const <= 64'h8000000000008089;
-            8'h25  : iota_const <= 64'h8000000000008003;
-            8'h4b  : iota_const <= 64'h8000000000008002;
-            8'h97  : iota_const <= 64'h8000000000000080;
-            8'h2e  : iota_const <= 64'h000000000000800a;
-            8'h5c  : iota_const <= 64'h800000008000000a;
-            8'hb8  : iota_const <= 64'h8000000080008081;
-            8'h70  : iota_const <= 64'h8000000000008080;
-            8'he0  : iota_const <= 64'h0000000080000001;
-            8'hc0  : iota_const <= 64'h8000000080008008;             
-            default: iota_const <= 64'h0000000000000000;
+    always @(LFSR) begin 
+        case(LFSR)
+            8'h01  : CONST <= 64'h0000000000000001;
+            8'h02  : CONST <= 64'h0000000000008082;
+            8'h04  : CONST <= 64'h800000000000808A;
+            8'h08  : CONST <= 64'h8000000080008000;
+            8'h11  : CONST <= 64'h000000000000808B;
+            8'h23  : CONST <= 64'h0000000080000001;
+            8'h47  : CONST <= 64'h8000000080008081;
+            8'h8E  : CONST <= 64'h8000000000008009;
+            8'h1C  : CONST <= 64'h000000000000008A;
+            8'h38  : CONST <= 64'h0000000000000088;
+            8'h71  : CONST <= 64'h0000000080008009;
+            8'hE2  : CONST <= 64'h000000008000000A;
+            8'hC4  : CONST <= 64'h000000008000808B;
+            8'h89  : CONST <= 64'h800000000000008B;
+            8'h12  : CONST <= 64'h8000000000008089;
+            8'h25  : CONST <= 64'h8000000000008003;
+            8'h4B  : CONST <= 64'h8000000000008002;
+            8'h97  : CONST <= 64'h8000000000000080;
+            8'h2E  : CONST <= 64'h000000000000800A;
+            8'h5C  : CONST <= 64'h800000008000000A;
+            8'hB8  : CONST <= 64'h8000000080008081;
+            8'h70  : CONST <= 64'h8000000000008080;
+            8'hE0  : CONST <= 64'h0000000080000001;
+            8'hC0  : CONST <= 64'h8000000080008008; 			
+            default : CONST <= 64'h0000000000000000;
         endcase
     end 
 
-    always @(posedge clk) begin
-        if (reset)  state <= `s_reset;
-        else        state <= next_state;
+    always @(posedge CLK) begin
+        if (RESET)  STATE <= `S_RESET;
+        else        STATE <= NEXT_STATE;
     end 
 
-    always @(state, init, go, lfsr) begin
-        reset_rf <= 0;
-        enable_rf <= 0;
-        reset_lfsr <= 0;
-        enable_lfsr <= 0;
-        done <= 0;
-        next_state <= state;
+    always @(STATE, INIT, GO, LFSR) begin
+        RESET_RF <= 0;
+        ENABLE_RF <= 0;
+        RESET_LFSR <= 0;
+        ENABLE_LFSR <= 0;
+        DONE <= 0;
+        NEXT_STATE <= STATE;
         
-        case (state)
-            `s_reset : begin 
-                reset_rf <= 1;
-                reset_lfsr <= 1;
-                if (init) next_state <= `s_init;
+        case (STATE)
+            `S_RESET : begin 
+                RESET_RF <= 1;
+                RESET_LFSR <= 1;
+                if (INIT) NEXT_STATE <= `S_INIT;
             end 
-            `s_init : begin
-               enable_rf <= 0;
-               enable_lfsr <= 0;
-               done <= 0; 
-               if (go) next_state <= `s_round1;
+            `S_INIT : begin
+               ENABLE_RF <= 0;
+               ENABLE_LFSR <= 0;
+               DONE <= 0; 
+               if (GO) NEXT_STATE <= `S_ROUND;
             end
-            `s_round1 : begin
-                enable_rf <= 0;
-                enable_lfsr <= 0;
-                next_state <= `s_round2;
-            end
-            `s_round2 : begin
-                enable_rf <= 1;
-                enable_lfsr <= 1;
-                if (lfsr == 8'hc0) next_state <= `s_done;
-                else next_state <= `s_round1;
-            end
-            `s_done : begin
-                done <= 1;
-                reset_lfsr <= 1;
-                next_state <= `s_init;
+            `S_ROUND : begin
+                ENABLE_RF <= 1;
+                ENABLE_LFSR <= 1;
+                if (LFSR == 8'hC0) NEXT_STATE <= `S_DONE;
+            end 
+            `S_DONE : begin
+                DONE <= 1;
+                RESET_LFSR <= 1;
+                NEXT_STATE <= `S_INIT;
             end 
         endcase
     end 
 
-`ifdef DEBUG_ILA
-    ila_2 ILA_keccak_ctrl(
-        .clk(clk),
-        .probe0({state, next_state}), // 6
-        .probe1({reset, init, go, done, reset_rf, enable_rf}), // 6
-        .probe2({iota_const}), // 64
-        .probe3({lfsr, reset_lfsr, enable_lfsr}) // 10
-    );
-`endif
 endmodule
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-module theta (
-    input   [1599:0] x,
-    output  [1599:0] y
+module Theta (
+    input   [1599:0] X,
+    output  [1599:0] Y
 );
-    wire    [319:0] sums;
-    assign sums = x[1599:1280] ^ x[1279:960] ^ x[959:640] ^ x[639:320] ^ x[319:0];
+    wire    [319:0] SUMS;
+    assign SUMS = X[1599:1280] ^ X[1279:960] ^ X[959:640] ^ X[639:320] ^ X[319:0];
 
-    genvar i;
+    genvar I;
     generate
-        for (i = 0; i < 5; i = i + 1)
-            begin               
-                assign y[320*i+63  : 320*i+0]   = x[320*i+63  : 320*i+0]   ^ sums[319 : 256] ^ {sums[126 : 64],  sums[127]};
-                assign y[320*i+127 : 320*i+64]  = x[320*i+127 : 320*i+64]  ^ sums[63  : 0]   ^ {sums[190 : 128], sums[191]};
-                assign y[320*i+191 : 320*i+128] = x[320*i+191 : 320*i+128] ^ sums[127 : 64]  ^ {sums[254 : 192], sums[255]};
-                assign y[320*i+255 : 320*i+192] = x[320*i+255 : 320*i+192] ^ sums[191 : 128] ^ {sums[318 : 256], sums[319]};
-                assign y[320*i+319 : 320*i+256] = x[320*i+319 : 320*i+256] ^ sums[255 : 192] ^ {sums[62  : 0],   sums[63]};
+        for (I = 0; I < 5; I = I + 1)
+            begin				
+                assign Y[320*I+319 : 320*I+256] = X[320*I+319 : 320*I+256] ^ SUMS[63  :  0 ] ^ {SUMS[254 : 192], SUMS[255]}; // 0
+                assign Y[320*I+255 : 320*I+192] = X[320*I+255 : 320*I+192] ^ SUMS[319 : 256] ^ {SUMS[190 : 128], SUMS[191]}; // 1	
+                assign Y[320*I+191 : 320*I+128] = X[320*I+191 : 320*I+128] ^ SUMS[255 : 192] ^ {SUMS[126 : 64 ], SUMS[127]}; // 2
+                assign Y[320*I+127 : 320*I+64 ] = X[320*I+127 : 320*I+64 ] ^ SUMS[191 : 128] ^ {SUMS[ 62 :  0 ], SUMS[63]}; // 3	
+				assign Y[320*I+63  :  320*I+0 ] = X[320*I+63  :  320*I+0 ] ^ SUMS[127 : 64 ] ^ {SUMS[318 : 256], SUMS[319]}; // 4	
             end        
     endgenerate
 
@@ -249,141 +278,158 @@ endmodule
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-module rho (
-    input   [1599:0] x,
-    output  [1599:0] y
+module Rho (
+    input   [1599:0] X,
+    output  [1599:0] Y
 );
     // Y = 0
-    assign y[  63 :    0] = {x[  63 :    0]};
-    assign y[ 127 :   64] = {x[ 126 :   64], x[ 127]};
-    assign y[ 191 :  128] = {x[ 129 :  128], x[ 191 :  130]};
-    assign y[ 255 :  192] = {x[ 227 :  192], x[ 255 :  228]};
-    assign y[ 319 :  256] = {x[ 292 :  256], x[ 319 :  293]};
-    
-    // Y = 1
-    assign y[ 383 :  320] = {x[ 347 :  320], x[ 383 :  348]};
-    assign y[ 447 :  384] = {x[ 403 :  384], x[ 447 :  404]};
-    assign y[ 511 :  448] = {x[ 505 :  448], x[ 511 :  506]};
-    assign y[ 575 :  512] = {x[ 520 :  512], x[ 575 :  521]};
-    assign y[ 639 :  576] = {x[ 619 :  576], x[ 639 :  620]};
-    
-    // Y = 2
-    assign y[ 703 :  640] = {x[ 700 :  640], x[ 703 :  701]};
-    assign y[ 767 :  704] = {x[ 757 :  704], x[ 767 :  758]};
-    assign y[ 831 :  768] = {x[ 788 :  768], x[ 831 :  789]};
-    assign y[ 895 :  832] = {x[ 870 :  832], x[ 895 :  871]};
-    assign y[ 959 :  896] = {x[ 920 :  896], x[ 959 :  921]};   
+    assign Y[1599 : 1536] = X[1599 : 1536]; 
+    assign Y[1535 : 1472] = {X[1534 : 1472] , X[1535]};
+    assign Y[1471 : 1408] = {X[1409 : 1408], X[1471 : 1410]};// 62
+    assign Y[1407 : 1344] = {X[1379 : 1344], X[1407 : 1380]};// 28
+    assign Y[1343 : 1280] = {X[1316 : 1280], X[1343 : 1317]};// 27
 
+    // Y = 1
+    assign Y[1279 : 1216] = {X[1243 : 1216], X[1279 : 1244]};// 36
+    assign Y[1215 : 1152] = {X[1171 : 1152], X[1215 : 1172]};// 44
+    assign Y[1151 : 1088] = {X[1145 : 1088], X[1151 : 1146]};// 6
+    assign Y[1087 : 1024] = {X[1032 : 1024], X[1087 : 1033]};// 55
+    assign Y[1023 :  960] = {X[1003 :  960], X[1023 : 1004]};// 20
+	
+    // Y = 2 
+    assign Y[ 959 :  896] = {X[ 956 :  896], X[ 959 :  957]};// 3
+    assign Y[ 895 :  832] = {X[ 885 :  832], X[ 895 :  886]};// 10
+    assign Y[ 831 :  768] = {X[ 788 :  768], X[ 831 :  789]};// 43
+    assign Y[ 767 :  704] = {X[ 742 :  704], X[ 767 :  743]};// 25
+    assign Y[ 703 :  640] = {X[ 664 :  640], X[ 703 :  665]};// 39
+	
     // Y = 3
-    assign y[1023 :  960] = {x[ 982 :  960], x[1023 :  983]};
-    assign y[1087 : 1024] = {x[1042 : 1024], x[1087 : 1043]};
-    assign y[1151 : 1088] = {x[1136 : 1088], x[1151 : 1137]};
-    assign y[1215 : 1152] = {x[1194 : 1152], x[1215 : 1195]};
-    assign y[1279 : 1216] = {x[1271 : 1216], x[1279 : 1272]};   
-    
+    assign Y[ 639 :  576] = {X[ 598 :  576], X[ 639 :  599]};// 41
+    assign Y[ 575 :  512] = {X[ 530 :  512], X[ 575 :  531]};// 45
+    assign Y[ 511 :  448] = {X[ 496 :  448], X[ 511 :  497]};// 15
+    assign Y[ 447 :  384] = {X[ 426 :  384], X[ 447 :  427]};// 21
+    assign Y[ 383 :  320] = {X[ 375 :  320], X[ 383 :  376]};// 8
+      
     // Y = 4
-    assign y[1343 : 1280] = {x[1325 : 1280], x[1343 : 1326]};
-    assign y[1407 : 1344] = {x[1405 : 1344], x[1407 : 1406]};
-    assign y[1471 : 1408] = {x[1410 : 1408], x[1471 : 1411]};
-    assign y[1535 : 1472] = {x[1479 : 1472], x[1535 : 1480]};
-    assign y[1599 : 1536] = {x[1585 : 1536], x[1599 : 1586]}; 
+    assign Y[ 319 :  256] = {X[ 301 :  256], X[ 319 :  302]};// 18
+    assign Y[ 255 :  192] = {X[ 253 :  192], X[ 255 :  254]};// 2
+    assign Y[ 191 :  128] = {X[ 130 :  128], X[ 191 :  131]};// 61
+    assign Y[ 127 :   64] = {X[ 71 :   64 ], X[ 127 :  72 ]};// 56
+    assign Y[  63 :    0] = {X[  49 :    0], X[  63 :  50 ]};// 14
 
 endmodule
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-module pi (
-    input   [1599 : 0] x,
-    output  [1599 : 0] y
+module Pi (
+    input   [1599:0] X,
+    output  [1599:0] Y
 );
-    // Y = 0
-    assign y[  63 :   0] = x[  63 :    0];
-    assign y[ 127 :  64] = x[ 447 :  384];
-    assign y[ 191 : 128] = x[ 831 :  768];
-    assign y[ 255 : 192] = x[1215 : 1152];
-    assign y[ 319 : 256] = x[1599 : 1536];
-    
+    // Y = 0   
+    assign Y[1599 : 1536] = X[1599 : 1536]; // 0,0 - 0,0
+    assign Y[1535 : 1472] = X[1215 : 1152];	//[1,0] - 1,1
+    assign Y[1471 : 1408] = X[ 831 :  768];	//[2,0] - 2,2
+    assign Y[1407 : 1344] = X[ 447 :  384];	//[3,0] - 3,3
+    assign Y[1343 : 1280] = X[  63 :    0];	//[4,0] - 4,4 
+
     // Y = 1
-    assign y[ 383 : 320] = x[ 255 :  192];
-    assign y[ 447 : 384] = x[ 639 :  576];
-    assign y[ 511 : 448] = x[ 703 :  640];
-    assign y[ 575 : 512] = x[1087 : 1024];
-    assign y[ 639 : 576] = x[1471 : 1408];
+    assign Y[1279 : 1216] = X[1407 : 1344]; //[0,1] - 3,0 
+    assign Y[1215 : 1152] = X[1023 :  960];	//[1,1] - 4,1
+    assign Y[1151 : 1088] = X[ 959 :  896];	//[2,1] - 0,2
+    assign Y[1087 : 1024] = X[ 575 :  512];	//[3,1] - 1,3
+    assign Y[1023 :  960] = X[ 191 :  128]; //[4,1] - 2,4
 
     // Y = 2    
-    assign y[ 703 : 640] = x[ 127 :   64];
-    assign y[ 767 : 704] = x[ 511 :  448];
-    assign y[ 831 : 768] = x[ 895 :  832];
-    assign y[ 895 : 832] = x[1279 : 1216];
-    assign y[ 959 : 896] = x[1343 : 1280];   
-
+    assign Y[ 959 :  896] = X[1535 : 1472];  // 0,2 - 1,0
+    assign Y[ 895 :  832] = X[1151 : 1088];  // 1,2 - 2,1
+    assign Y[ 831 :  768] = X[ 767 :  704];  // 2,2 - 3,2
+    assign Y[ 767 :  704] = X[ 383 :  320];  // 3,2 - 4,3
+    assign Y[ 703 :  640] = X[ 319 :  256];  // 4,2 - 0,4
+	
     // Y = 3
-    assign y[1023 :  960] = x[ 319 :  256];
-    assign y[1087 : 1024] = x[ 383 :  320];
-    assign y[1151 : 1088] = x[ 767 :  704];
-    assign y[1215 : 1152] = x[1151 : 1088];
-    assign y[1279 : 1216] = x[1535 : 1472];   
- 
-    // Y = 4   
-    assign y[1343 : 1280] = x[ 191 :  128];
-    assign y[1407 : 1344] = x[ 575 :  512];
-    assign y[1471 : 1408] = x[ 959 :  896];
-    assign y[1535 : 1472] = x[1023 :  960];
-    assign y[1599 : 1536] = x[1407 : 1344]; 
-    
+    assign Y[ 639 :  576] = X[1343 : 1280];  // 0,3 - 4,0
+    assign Y[ 575 :  512] = X[1279 : 1216];  // 1,3 - 0,1
+    assign Y[ 511 :  448] = X[ 895 :  832];  // 2,3 - 1,2
+    assign Y[ 447 :  384] = X[ 511 :  448];	 // 3,3 - 2,3
+    assign Y[ 383 :  320] = X[ 127 :   64];	 // 4,3 - 3,4
+
+    // Y = 4
+    assign Y[ 319 :  256] = X[1471 : 1408];  // 0,4 - 2,0
+    assign Y[ 255 :  192] = X[1087 : 1024];	 // 1,4 - 3,1
+    assign Y[ 191 :  128] = X[ 703 :  640];	 // 2,4 - 4,2
+    assign Y[ 127 :   64] = X[ 639 :  576];	 // 3,4 - 0,3
+    assign Y[  63 :    0] = X[ 255 :  192];	 // 4,4 - 1,4
+	
+endmodule
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+`define low_pos(x,y)        `high_pos(x,y) - 63
+`define high_pos(x,y)       1599 - 64*(5*y+x)
+`define add_1(x)            (x == 4 ? 0 : x + 1)
+`define add_2(x)            (x == 3 ? 0 : x == 4 ? 1 : x + 2)
+
+module Chi (
+    input   [1599:0] X_0, X_1,
+    output  [1599:0] Y_0, Y_1
+);
+
+    wire   [63:0]   e_0[4:0][4:0], e_1[4:0][4:0], f_0[4:0][4:0], f_1[4:0][4:0];
+    wire    [63:0]   a0b0[4:0][4:0], a0b1[4:0][4:0], a1b0[4:0][4:0], a1b1[4:0][4:0];
+    genvar x, y;
+
+    generate
+      for(y=0; y<5; y=y+1)
+        begin : L0
+          for(x=0; x<5; x=x+1)
+            begin : L1
+              assign e_0[x][y] = X_0[`high_pos(x,y) : `low_pos(x,y)];
+              assign e_1[x][y] = X_1[`high_pos(x,y) : `low_pos(x,y)];
+            end
+        end
+    endgenerate
+
+	generate
+      for(y=0; y<5; y=y+1)
+        begin : L5
+          for(x=0; x<5; x=x+1)
+            begin : L6
+				assign a0b0[x][y] = e_0[x][y] ^ e_0[`add_2(x)][y] ^ (e_0[`add_1(x)][y] & e_0[`add_2(x)][y]);
+				assign a0b1[x][y] = e_0[`add_1(x)][y] & e_1[`add_2(x)][y];
+				assign a1b0[x][y] = e_1[`add_1(x)][y] & e_0[`add_2(x)][y];
+				assign a1b1[x][y] = e_1[x][y] ^ e_1[`add_2(x)][y] ^ (e_1[`add_1(x)][y] & e_1[`add_2(x)][y]);
+			  
+				assign f_0[x][y] = a0b0[x][y] ^ a0b1[x][y];
+				assign f_1[x][y] = a1b0[x][y] ^ a1b1[x][y];
+            end
+        end
+    endgenerate 
+
+    generate
+      for(y=0; y<5; y=y+1)
+        begin : L99
+          for(x=0; x<5; x=x+1)
+            begin : L100
+              assign Y_0[`high_pos(x,y) : `low_pos(x,y)] = f_0[x][y];
+              assign Y_1[`high_pos(x,y) : `low_pos(x,y)] = f_1[x][y];
+            end
+        end
+    endgenerate
+
 endmodule
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-`define x1 (x0 == 4 ? 0 : x0 + 1)
-`define x2 (x0 == 3 ? 0 : (x0 == 4 ? 1 : x0 + 2))
-`define Idx(x,y) ((5 * y + x) * 64)
-// function integer Idx(input integer x, input integer y);
-//     Idx = (5 * y + x) * 64; // (5 * y + x) * 64
-// endfunction
-
-module chi_iota (
-    input clk, rst,
-    input [1599:0] I_x [0:1],
-    input [1599:0] I_r,
-    input [63:0] I_iota_const,
-    output reg [1599:0] O_z [0:1]
+module Iota (
+    input   [1599:0] X,
+    input   [63:0]   C,
+    output  [1599:0] Y
 );
 
-    // reg [2:0] x0, x1, x2, y;
-    // reg [1:0] rx;
-    // reg [1:0] i, j;
-    reg [1:0] mi, mj;
-    reg [1599:0] FFxDN [0:1][0:1];
-    reg [1599:0] FFxDP [0:1][0:1];
-    reg [1599:0] result [0:1];
-
-    always @(posedge clk) begin
-        for (mi = 0; mi < 2; mi = mi + 1)
-            for (mj = 0; mj < 2; mj = mj + 1) 
-                if (rst) 
-                    FFxDP[mi][mj] = 1600'h0;
-                else
-                    FFxDP[mi][mj] = FFxDN[mi][mj];
-    end
-
-genvar x0, y;
-generate
-    for (x0 = 0; x0 < 5; x0 = x0 + 1) begin
-        // Chi
-        for (y = 0; y < 5; y = y + 1) begin
-            assign FFxDN[0][0][`Idx(x0,y)+:64] = I_x[0][`Idx(x0,y)+:64] ^ (~I_x[0][`Idx(`x1,y)+:64] & I_x[0][`Idx(`x2,y)+:64]);
-            assign FFxDN[1][1][`Idx(x0,y)+:64] = I_x[1][`Idx(x0,y)+:64] ^ (~I_x[1][`Idx(`x1,y)+:64] & I_x[1][`Idx(`x2,y)+:64]);
-            assign FFxDN[0][1][`Idx(x0,y)+:64] = (I_x[0][`Idx(`x1,y)+:64] & I_x[1][`Idx(`x2,y)+:64]) ^ I_r[`Idx(x0,y)+:64];
-            assign FFxDN[1][0][`Idx(x0,y)+:64] = (I_x[1][`Idx(`x1,y)+:64] & I_x[0][`Idx(`x2,y)+:64]) ^ I_r[`Idx(x0,y)+:64];
-            assign result[0] = FFxDP[0][0] ^ FFxDP[0][1];
-            assign result[1] = FFxDP[1][0] ^ FFxDP[1][1];
-        end
-    end
-endgenerate
-
-// Iota
-assign O_z[0] = {result[0][1599:64], result[0][63:0] ^ I_iota_const};
-assign O_z[1] = result[1];
+    assign Y = {(X[1599:1536] ^ C), X[1535:0]};
 
 endmodule
+
+`undef low_pos 
+`undef high_pos 
+`undef add_1 
+`undef add_2 
