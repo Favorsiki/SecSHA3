@@ -411,6 +411,12 @@ module SecHash_ctrl(
         end 
         default : keccak_busy <= 0;
     endcase 
+	
+	/*
+	always @(posedge clk ) begin
+        io_output <= sel ? io_input_b : io_input_a;         // Sel = 1 -> io_input_b, Sel = 0 -> io_input_a
+    end
+	*/
 
     // READ FIFO 
     assign fifo0_ren = fifo_ren;
@@ -540,7 +546,7 @@ module SecHash_ctrl(
             k_extend_1 = dout_req;
         end
         default : begin
-            k_extend_0 = 0;
+            k_extend_0 = 0; 
             k_extend_1 = 0;
         end 
     endcase
@@ -601,7 +607,7 @@ module SecHash_ctrl(
         end 
         default : begin
             squeeze_start = 0;
-            valid = 0;
+            valid = 0; 
             dout  = 1;
         end 
     endcase
@@ -610,7 +616,7 @@ module SecHash_ctrl(
             done <= 1;
         end
         default : begin
-            done <= 0;
+            done <= 0; 
         end 
     endcase
 
