@@ -20,18 +20,18 @@
 
 namespace yacl::crypto {
 
-enum class KemScheme { UNKNOWN, ML_KEM_512 };
+enum class KemScheme { UNKNOWN, MLKEM512 };
 
-class KemEncryptor {
+class KemEncaps {
  public:
-  virtual ~KemEncryptor() = default;
+  virtual ~KemEncaps() = default;
   virtual KemScheme GetScheme() const = 0;
   virtual std::vector<uint8_t> Encaps(ByteContainerView plaintext) = 0;
-};
+}
 
-class KemDecryptor {
+class KemDecaps {
  public:
-  virtual ~KemDecryptor() = default;
+  virtual ~KemDecaps() = default;
   virtual KemScheme GetScheme() const = 0;
   virtual std::vector<uint8_t> Decaps(ByteContainerView ciphertext) = 0;
 };
