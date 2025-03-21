@@ -24,8 +24,7 @@ int		FindMarker(FILE *infile, const char *marker);
 int		ReadHex(FILE *infile, unsigned char *A, int Length, char *str);
 void	fprintBstr(FILE *fp, char *S, unsigned char *A, unsigned long long L);
 
-int
-main()
+int test()
 {
     char                fn_req[32], fn_rsp[32];
     FILE                *fp_req, *fp_rsp, *fp;

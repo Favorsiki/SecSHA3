@@ -39,22 +39,26 @@ TEST(MLkemEnc, EncryptDecrypt_shouldOk) {
 
 #include "ml_kem_enc.h"
 #include "key_utils.h"
+#include <stdio.h>
 
 int main() {
+  FILE* fp = freopen("kyber512.log","w+",stdout);
   // GIVEN
-  auto [ek, dk] = GenMLkemKeyPairToPemBuf();
+  auto [ek, dk] = yacl::crypto::GenMLkemKeyPairToPemBuf();
 
   // WHEN
-  auto enc_ctx = MLkemEncaps(ek);
-  auto dec_ctx = MLkemDecaps(dk);
+  auto enc_ctx = yacl::crypto::MLkemEncaps(ek);
+  auto dec_ctx = yacl::crypto::MLkemDecaps(dk);
 
   auto [ss, c] = enc_ctx.Encaps();
   auto ss1     = dec_ctx.Decaps(c);
 
   // THEN
-  if (std::memcmp(ss.data(), ss1.data(), ss1.size()) == 0) {
-    cout << "MLKEM512 EXECUTION RIGHT" << endl;
-  } else {
-    cout << "MLKEM512 EXECUTION ERROR" << endl;
+  for (int i = 0; i < ss1.size(); ++i) {
+    if (ss[i] != ss1[i]) printf("MLKEM512 EXECUTION RIGHT\n");
   }
+  printf("MLKEM512 EXECUTION ERROR\n");
+  fclose(fp);
+
+  return 0;
 }
