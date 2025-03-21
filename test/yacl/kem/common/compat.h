@@ -1,6 +1,8 @@
 #ifndef  PQCLEAN_COMMON_COMPAT_H
 #define PQCLEAN_COMMON_COMPAT_H
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 /* This file serves to solve compatibility issues between different
  * versions of compilers.
  *
@@ -69,5 +71,7 @@ UNALIGNED_VECTOR_POLYFILL_GCC
 #else
 # define PQCLEAN_PREVENT_BRANCH_HACK(b)
 #endif
-
+#ifdef __cplusplus
+}
+#endif
 #endif // PQCLEAN_COMMON_COMPAT_H

@@ -4,6 +4,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define AES256CTR_BLOCKBYTES 64
 
 #define AES256CTR_NAMESPACE(s) pqcrystals_aes256ctr_ref##s
@@ -28,5 +32,7 @@ void aes256ctr_init(aes256ctr_ctx *state,
 void aes256ctr_squeezeblocks(uint8_t *out,
                              size_t nblocks,
                              aes256ctr_ctx *state);
-
+#ifdef __cplusplus
+}
+#endif
 #endif

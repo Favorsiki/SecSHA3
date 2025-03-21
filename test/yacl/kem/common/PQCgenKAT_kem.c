@@ -24,7 +24,7 @@ int		FindMarker(FILE *infile, const char *marker);
 int		ReadHex(FILE *infile, unsigned char *A, int Length, char *str);
 void	fprintBstr(FILE *fp, char *S, unsigned char *A, unsigned long long L);
 
-int test()
+int top()
 {
     char                fn_req[32], fn_rsp[32];
     FILE                *fp_req, *fp_rsp, *fp;
@@ -92,7 +92,6 @@ int test()
             return KAT_DATA_ERROR;
         }
         fprintBstr(fp_rsp, "seed = ", seed, 48);
-        printBstr("seed", seed, 48);
 
         randombytes_init(seed, NULL, 256);
 
@@ -104,8 +103,6 @@ int test()
         }
         fprintBstr(fp_rsp, "ek = ", pk, CRYPTO_PUBLICKEYBYTES);
         fprintBstr(fp_rsp, "dk = ", sk, CRYPTO_SECRETKEYBYTES);
-        printBstr("kem_ek", pk, CRYPTO_PUBLICKEYBYTES);
-        printBstr("kem_dk", sk, CRYPTO_SECRETKEYBYTES);
 
         printf("\n");
         printf("kem_enc:\n");
@@ -115,8 +112,6 @@ int test()
         }
         fprintBstr(fp_rsp, "ct = ", ct, CRYPTO_CIPHERTEXTBYTES);
         fprintBstr(fp_rsp, "ss = ", ss, CRYPTO_BYTES);
-        printBstr("kem_ct", ct, CRYPTO_CIPHERTEXTBYTES);
-        printBstr("kem_ss", ss, CRYPTO_BYTES);
 
         fprintf(fp_rsp, "\n");
         printf("\n");

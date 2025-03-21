@@ -5,7 +5,7 @@
 #include <stdint.h>
 
 /*************************************************
-* Name:        polyvec_compress
+* Name:        PQCLEAN_MLKEM512_CLEAN_polyvec_compress
 *
 * Description: Compress and serialize vector of polynomials
 *
@@ -13,7 +13,7 @@
 *                            (needs space for KYBER_POLYVECCOMPRESSEDBYTES)
 *              - const polyvec *a: pointer to input vector of polynomials
 **************************************************/
-void polyvec_compress(uint8_t r[KYBER_POLYVECCOMPRESSEDBYTES], const polyvec *a) {
+void PQCLEAN_MLKEM512_CLEAN_polyvec_compress(uint8_t r[KYBER_POLYVECCOMPRESSEDBYTES], const polyvec *a) {
     unsigned int i, j, k;
     uint64_t d0;
 
@@ -43,16 +43,16 @@ void polyvec_compress(uint8_t r[KYBER_POLYVECCOMPRESSEDBYTES], const polyvec *a)
 }
 
 /*************************************************
-* Name:        polyvec_decompress
+* Name:        PQCLEAN_MLKEM512_CLEAN_polyvec_decompress
 *
 * Description: De-serialize and decompress vector of polynomials;
-*              approximate inverse of polyvec_compress
+*              approximate inverse of PQCLEAN_MLKEM512_CLEAN_polyvec_compress
 *
 * Arguments:   - polyvec *r:       pointer to output vector of polynomials
 *              - const uint8_t *a: pointer to input byte array
 *                                  (of length KYBER_POLYVECCOMPRESSEDBYTES)
 **************************************************/
-void polyvec_decompress(polyvec *r, const uint8_t a[KYBER_POLYVECCOMPRESSEDBYTES]) {
+void PQCLEAN_MLKEM512_CLEAN_polyvec_decompress(polyvec *r, const uint8_t a[KYBER_POLYVECCOMPRESSEDBYTES]) {
     unsigned int i, j, k;
 
     uint16_t t[4];
@@ -72,7 +72,7 @@ void polyvec_decompress(polyvec *r, const uint8_t a[KYBER_POLYVECCOMPRESSEDBYTES
 }
 
 /*************************************************
-* Name:        polyvec_tobytes
+* Name:        PQCLEAN_MLKEM512_CLEAN_polyvec_tobytes
 *
 * Description: Serialize vector of polynomials
 *
@@ -80,63 +80,63 @@ void polyvec_decompress(polyvec *r, const uint8_t a[KYBER_POLYVECCOMPRESSEDBYTES
 *                            (needs space for KYBER_POLYVECBYTES)
 *              - const polyvec *a: pointer to input vector of polynomials
 **************************************************/
-void polyvec_tobytes(uint8_t r[KYBER_POLYVECBYTES], const polyvec *a) {
+void PQCLEAN_MLKEM512_CLEAN_polyvec_tobytes(uint8_t r[KYBER_POLYVECBYTES], const polyvec *a) {
     unsigned int i;
     for (i = 0; i < KYBER_K; i++) {
-        poly_tobytes(r + i * KYBER_POLYBYTES, &a->vec[i]);
+        PQCLEAN_MLKEM512_CLEAN_poly_tobytes(r + i * KYBER_POLYBYTES, &a->vec[i]);
     }
 }
 
 /*************************************************
-* Name:        polyvec_frombytes
+* Name:        PQCLEAN_MLKEM512_CLEAN_polyvec_frombytes
 *
 * Description: De-serialize vector of polynomials;
-*              inverse of polyvec_tobytes
+*              inverse of PQCLEAN_MLKEM512_CLEAN_polyvec_tobytes
 *
 * Arguments:   - uint8_t *r:       pointer to output byte array
 *              - const polyvec *a: pointer to input vector of polynomials
 *                                  (of length KYBER_POLYVECBYTES)
 **************************************************/
-void polyvec_frombytes(polyvec *r, const uint8_t a[KYBER_POLYVECBYTES]) {
+void PQCLEAN_MLKEM512_CLEAN_polyvec_frombytes(polyvec *r, const uint8_t a[KYBER_POLYVECBYTES]) {
     unsigned int i;
     for (i = 0; i < KYBER_K; i++) {
-        poly_frombytes(&r->vec[i], a + i * KYBER_POLYBYTES);
+        PQCLEAN_MLKEM512_CLEAN_poly_frombytes(&r->vec[i], a + i * KYBER_POLYBYTES);
     }
 }
 
 /*************************************************
-* Name:        polyvec_ntt
+* Name:        PQCLEAN_MLKEM512_CLEAN_polyvec_ntt
 *
 * Description: Apply forward NTT to all elements of a vector of polynomials
 *
 * Arguments:   - polyvec *r: pointer to in/output vector of polynomials
 **************************************************/
-void polyvec_ntt(polyvec *r) {
+void PQCLEAN_MLKEM512_CLEAN_polyvec_ntt(polyvec *r) {
     unsigned int i;
     for (i = 0; i < KYBER_K; i++) {
         printf("r[%d]:\n",i);
         //--printCoeff("[CPA_poly_ntt_input]", r->vec[i].coeffs);
-        poly_ntt(&r->vec[i]);
+        PQCLEAN_MLKEM512_CLEAN_poly_ntt(&r->vec[i]);
     }
 }
 
 /*************************************************
-* Name:        polyvec_invntt_tomont
+* Name:        PQCLEAN_MLKEM512_CLEAN_polyvec_invntt_tomont
 *
 * Description: Apply inverse NTT to all elements of a vector of polynomials
 *              and multiply by Montgomery factor 2^16
 *
 * Arguments:   - polyvec *r: pointer to in/output vector of polynomials
 **************************************************/
-void polyvec_invntt_tomont(polyvec *r) {
+void PQCLEAN_MLKEM512_CLEAN_polyvec_invntt_tomont(polyvec *r) {
     unsigned int i;
     for (i = 0; i < KYBER_K; i++) {
-        poly_invntt_tomont(&r->vec[i]);
+        PQCLEAN_MLKEM512_CLEAN_poly_invntt_tomont(&r->vec[i]);
     }
 }
 
 /*************************************************
-* Name:        polyvec_basemul_acc_montgomery
+* Name:        PQCLEAN_MLKEM512_CLEAN_polyvec_basemul_acc_montgomery
 *
 * Description: Multiply elements of a and b in NTT domain, accumulate into r,
 *              and multiply by 2^-16.
@@ -145,27 +145,27 @@ void polyvec_invntt_tomont(polyvec *r) {
 *            - const polyvec *a: pointer to first input vector of polynomials
 *            - const polyvec *b: pointer to second input vector of polynomials
 **************************************************/
-void polyvec_basemul_acc_montgomery(poly *r, const polyvec *a, const polyvec *b) {
+void PQCLEAN_MLKEM512_CLEAN_polyvec_basemul_acc_montgomery(poly *r, const polyvec *a, const polyvec *b) {
     unsigned int i;
     poly t;
     //--printCoeff("[PWM_input_a ]", a->vec[0].coeffs);
     //--printCoeff("[PWM_input_b ]", b->vec[0].coeffs);
-    poly_basemul_montgomery(r, &a->vec[0], &b->vec[0]);
+    PQCLEAN_MLKEM512_CLEAN_poly_basemul_montgomery(r, &a->vec[0], &b->vec[0]);
     //--printCoeff("[PWM_output_c]", r->coeffs);
     for (i = 1; i < KYBER_K; i++) {
     //--printCoeff("[PWM_input_a ]", a->vec[i].coeffs);
     //--printCoeff("[PWM_input_b ]", b->vec[i].coeffs);
-        poly_basemul_montgomery(&t, &a->vec[i], &b->vec[i]);
+        PQCLEAN_MLKEM512_CLEAN_poly_basemul_montgomery(&t, &a->vec[i], &b->vec[i]);
     //--printCoeff("[PWM_output_c]", t.coeffs);
-        poly_add(r, r, &t);
+        PQCLEAN_MLKEM512_CLEAN_poly_add(r, r, &t);
     }
 
-    poly_reduce(r);
+    PQCLEAN_MLKEM512_CLEAN_poly_reduce(r);
     //--printCoeff("[PWA_result]", r->coeffs);
 }
 
 /*************************************************
-* Name:        polyvec_reduce
+* Name:        PQCLEAN_MLKEM512_CLEAN_polyvec_reduce
 *
 * Description: Applies Barrett reduction to each coefficient
 *              of each element of a vector of polynomials;
@@ -173,15 +173,15 @@ void polyvec_basemul_acc_montgomery(poly *r, const polyvec *a, const polyvec *b)
 *
 * Arguments:   - polyvec *r: pointer to input/output polynomial
 **************************************************/
-void polyvec_reduce(polyvec *r) {
+void PQCLEAN_MLKEM512_CLEAN_polyvec_reduce(polyvec *r) {
     unsigned int i;
     for (i = 0; i < KYBER_K; i++) {
-        poly_reduce(&r->vec[i]);
+        PQCLEAN_MLKEM512_CLEAN_poly_reduce(&r->vec[i]);
     }
 }
 
 /*************************************************
-* Name:        polyvec_add
+* Name:        PQCLEAN_MLKEM512_CLEAN_polyvec_add
 *
 * Description: Add vectors of polynomials
 *
@@ -189,12 +189,12 @@ void polyvec_reduce(polyvec *r) {
 *            - const polyvec *a: pointer to first input vector of polynomials
 *            - const polyvec *b: pointer to second input vector of polynomials
 **************************************************/
-void polyvec_add(polyvec *r, const polyvec *a, const polyvec *b) {
+void PQCLEAN_MLKEM512_CLEAN_polyvec_add(polyvec *r, const polyvec *a, const polyvec *b) {
     unsigned int i;
     for (i = 0; i < KYBER_K; i++) {
         //--printCoeff("[Ar]", a->vec[i].coeffs);
         //--printCoeff("[e2]", b->vec[i].coeffs);
-        poly_add(&r->vec[i], &a->vec[i], &b->vec[i]);
+        PQCLEAN_MLKEM512_CLEAN_poly_add(&r->vec[i], &a->vec[i], &b->vec[i]);
         //--printCoeff("[u ]", b->vec[i].coeffs);
     }
 }

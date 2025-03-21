@@ -24,7 +24,7 @@
 static void pack_pk(uint8_t r[KYBER_INDCPA_PUBLICKEYBYTES],
                     polyvec *pk,
                     const uint8_t seed[KYBER_SYMBYTES]) {
-    polyvec_tobytes(r, pk);
+    PQCLEAN_MLKEM512_CLEAN_polyvec_tobytes(r, pk);
     memcpy(r + KYBER_POLYVECBYTES, seed, KYBER_SYMBYTES);
 }
 
@@ -41,7 +41,7 @@ static void pack_pk(uint8_t r[KYBER_INDCPA_PUBLICKEYBYTES],
 static void unpack_pk(polyvec *pk,
                       uint8_t seed[KYBER_SYMBYTES],
                       const uint8_t packedpk[KYBER_INDCPA_PUBLICKEYBYTES]) {
-    polyvec_frombytes(pk, packedpk);
+    PQCLEAN_MLKEM512_CLEAN_polyvec_frombytes(pk, packedpk);
     memcpy(seed, packedpk + KYBER_POLYVECBYTES, KYBER_SYMBYTES);
 }
 
@@ -54,7 +54,7 @@ static void unpack_pk(polyvec *pk,
 *              - polyvec *sk: pointer to input vector of polynomials (secret key)
 **************************************************/
 static void pack_sk(uint8_t r[KYBER_INDCPA_SECRETKEYBYTES], polyvec *sk) {
-    polyvec_tobytes(r, sk);
+    PQCLEAN_MLKEM512_CLEAN_polyvec_tobytes(r, sk);
 }
 
 /*************************************************
@@ -66,7 +66,7 @@ static void pack_sk(uint8_t r[KYBER_INDCPA_SECRETKEYBYTES], polyvec *sk) {
 *              - const uint8_t *packedsk: pointer to input serialized secret key
 **************************************************/
 static void unpack_sk(polyvec *sk, const uint8_t packedsk[KYBER_INDCPA_SECRETKEYBYTES]) {
-    polyvec_frombytes(sk, packedsk);
+    PQCLEAN_MLKEM512_CLEAN_polyvec_frombytes(sk, packedsk);
 }
 
 /*************************************************
@@ -81,9 +81,9 @@ static void unpack_sk(polyvec *sk, const uint8_t packedsk[KYBER_INDCPA_SECRETKEY
 *              poly *v: pointer to the input polynomial v
 **************************************************/
 static void pack_ciphertext(uint8_t r[KYBER_INDCPA_BYTES], polyvec *b, poly *v) {
-    polyvec_compress(r, b);
+    PQCLEAN_MLKEM512_CLEAN_polyvec_compress(r, b);
     //--printBstr("CPA_c1", r, KYBER_POLYVECCOMPRESSEDBYTES);
-    poly_compress(r + KYBER_POLYVECCOMPRESSEDBYTES, v);
+    PQCLEAN_MLKEM512_CLEAN_poly_compress(r + KYBER_POLYVECCOMPRESSEDBYTES, v);
     //--printBstr("CPA_c2", r+KYBER_POLYVECCOMPRESSEDBYTES, KYBER_POLYCOMPRESSEDBYTES);
 }
 
@@ -100,10 +100,10 @@ static void pack_ciphertext(uint8_t r[KYBER_INDCPA_BYTES], polyvec *b, poly *v) 
 static void unpack_ciphertext(polyvec *b, poly *v, const uint8_t c[KYBER_INDCPA_BYTES]) {
     printf("unpack_ciphertext : \n");
     //--printBstr("CPA_c1", c, KYBER_POLYVECCOMPRESSEDBYTES);
-    polyvec_decompress(b, c);
+    PQCLEAN_MLKEM512_CLEAN_polyvec_decompress(b, c);
     //--printCoeff("[u0]", b->vec[0].coeffs);
     //--printBstr("CPA_c2", c+KYBER_POLYVECCOMPRESSEDBYTES, KYBER_POLYCOMPRESSEDBYTES);  
-    poly_decompress(v, c + KYBER_POLYVECCOMPRESSEDBYTES);
+    PQCLEAN_MLKEM512_CLEAN_poly_decompress(v, c + KYBER_POLYVECCOMPRESSEDBYTES);
     //--printCoeff("[v]", v->coeffs);    
 }
 
@@ -144,11 +144,11 @@ static unsigned int rej_uniform(int16_t *r,
     return ctr;
 }
 
-#define gen_a(A,B)  gen_matrix(A,B,0)
-#define gen_at(A,B) gen_matrix(A,B,1)
+#define gen_a(A,B)  PQCLEAN_MLKEM512_CLEAN_gen_matrix(A,B,0)
+#define gen_at(A,B) PQCLEAN_MLKEM512_CLEAN_gen_matrix(A,B,1)
 
 /*************************************************
-* Name:        gen_matrix
+* Name:        PQCLEAN_MLKEM512_CLEAN_gen_matrix
 *
 * Description: Deterministically generate matrix A (or the transpose of A)
 *              from a seed. Entries of the matrix are polynomials that look
@@ -162,7 +162,7 @@ static unsigned int rej_uniform(int16_t *r,
 
 #define GEN_MATRIX_NBLOCKS ((12*KYBER_N/8*(1 << 12)/KYBER_Q + XOF_BLOCKBYTES)/XOF_BLOCKBYTES)
 // Not static for benchmarking
-void gen_matrix(polyvec *a, const uint8_t seed[KYBER_SYMBYTES], int transposed) {
+void PQCLEAN_MLKEM512_CLEAN_gen_matrix(polyvec *a, const uint8_t seed[KYBER_SYMBYTES], int transposed) {
     unsigned int ctr, i, j;
     unsigned int buflen;
     uint8_t buf[GEN_MATRIX_NBLOCKS * XOF_BLOCKBYTES];
@@ -196,7 +196,7 @@ void gen_matrix(polyvec *a, const uint8_t seed[KYBER_SYMBYTES], int transposed) 
 }
 
 /*************************************************
-* Name:        indcpa_keypair_derand
+* Name:        PQCLEAN_MLKEM512_CLEAN_indcpa_keypair_derand
 *
 * Description: Generates public and private key for the CPA-secure
 *              public-key encryption scheme underlying Kyber
@@ -208,7 +208,7 @@ void gen_matrix(polyvec *a, const uint8_t seed[KYBER_SYMBYTES], int transposed) 
 *              - const uint8_t *coins: pointer to input randomness
 *                             (of length KYBER_SYMBYTES bytes)
 **************************************************/
-void indcpa_keypair_derand(uint8_t pk[KYBER_INDCPA_PUBLICKEYBYTES],
+void PQCLEAN_MLKEM512_CLEAN_indcpa_keypair_derand(uint8_t pk[KYBER_INDCPA_PUBLICKEYBYTES],
         uint8_t sk[KYBER_INDCPA_SECRETKEYBYTES],
         const uint8_t coins[KYBER_SYMBYTES]) {
     unsigned int i;
@@ -231,16 +231,16 @@ void indcpa_keypair_derand(uint8_t pk[KYBER_INDCPA_PUBLICKEYBYTES],
 
     for (i = 0; i < KYBER_K; i++) {
         printf("CPA_s[%d]: \n", i);
-        poly_getnoise_eta1(&skpv.vec[i], noiseseed, nonce++);
+        PQCLEAN_MLKEM512_CLEAN_poly_getnoise_eta1(&skpv.vec[i], noiseseed, nonce++);
     }
     for (i = 0; i < KYBER_K; i++) {
         printf("CPA_e[%d]: \n", i);
-        poly_getnoise_eta1(&e.vec[i], noiseseed, nonce++);
+        PQCLEAN_MLKEM512_CLEAN_poly_getnoise_eta1(&e.vec[i], noiseseed, nonce++);
     }
     printf("CPA_ntt(s):\n");
-    polyvec_ntt(&skpv);
+    PQCLEAN_MLKEM512_CLEAN_polyvec_ntt(&skpv);
     printf("CPA_ntt(e):\n");
-    polyvec_ntt(&e);
+    PQCLEAN_MLKEM512_CLEAN_polyvec_ntt(&e);
 
     printf("CPA: t=A*s+e :\n");
     // matrix-vector multiplication
@@ -250,15 +250,15 @@ void indcpa_keypair_derand(uint8_t pk[KYBER_INDCPA_PUBLICKEYBYTES],
         //--printCoeff("A?1", a[i].vec[1].coeffs);
         //--printCoeff("s0", skpv.vec[0].coeffs);
         //--printCoeff("s1", skpv.vec[1].coeffs);
-        polyvec_basemul_acc_montgomery(&pkpv.vec[i], &a[i], &skpv);
-        poly_tomont(&pkpv.vec[i]);
+        PQCLEAN_MLKEM512_CLEAN_polyvec_basemul_acc_montgomery(&pkpv.vec[i], &a[i], &skpv);
+        PQCLEAN_MLKEM512_CLEAN_poly_tomont(&pkpv.vec[i]);
         //--printCoeff("tmp", pkpv.vec[i].coeffs);
     }
 
-    polyvec_add(&pkpv, &pkpv, &e);
+    PQCLEAN_MLKEM512_CLEAN_polyvec_add(&pkpv, &pkpv, &e);
     //--printCoeff("CPA_t[0]",pkpv.vec[0].coeffs);
     //--printCoeff("CPA_t[1]",pkpv.vec[1].coeffs);
-    polyvec_reduce(&pkpv);
+    PQCLEAN_MLKEM512_CLEAN_polyvec_reduce(&pkpv);
     //--printCoeff("CPA_t[0]_reduce",pkpv.vec[0].coeffs);
     //--printCoeff("CPA_t[1]_reduce",pkpv.vec[1].coeffs);
 
@@ -268,7 +268,7 @@ void indcpa_keypair_derand(uint8_t pk[KYBER_INDCPA_PUBLICKEYBYTES],
 
 
 /*************************************************
-* Name:        indcpa_enc
+* Name:        PQCLEAN_MLKEM512_CLEAN_indcpa_enc
 *
 * Description: Encryption function of the CPA-secure
 *              public-key encryption scheme underlying Kyber.
@@ -283,7 +283,7 @@ void indcpa_keypair_derand(uint8_t pk[KYBER_INDCPA_PUBLICKEYBYTES],
 *                                      (of length KYBER_SYMBYTES) to deterministically
 *                                      generate all randomness
 **************************************************/
-void indcpa_enc(uint8_t c[KYBER_INDCPA_BYTES],
+void PQCLEAN_MLKEM512_CLEAN_indcpa_enc(uint8_t c[KYBER_INDCPA_BYTES],
                                        const uint8_t m[KYBER_INDCPA_MSGBYTES],
                                        const uint8_t pk[KYBER_INDCPA_PUBLICKEYBYTES],
                                        const uint8_t coins[KYBER_SYMBYTES]) {
@@ -302,7 +302,7 @@ void indcpa_enc(uint8_t c[KYBER_INDCPA_BYTES],
 
     printf("CPA: Decompress(Decode1(m),1):\n");
     //--printBstr("CPA_input_m", (unsigned char*)&m[0], KYBER_INDCPA_MSGBYTES);
-    poly_frommsg(&k, m);
+    PQCLEAN_MLKEM512_CLEAN_poly_frommsg(&k, m);
     //--printCoeff("[CPA_poly_m]", k.coeffs);
 
     gen_at(at, seed);
@@ -310,43 +310,43 @@ void indcpa_enc(uint8_t c[KYBER_INDCPA_BYTES],
     for (i = 0; i < KYBER_K; i++) {
         printf("CPA_r[%d]: \n", i);
         //--printBstr("CPA_input_r", (unsigned char*)&coins[0], KYBER_SYMBYTES);    
-        poly_getnoise_eta1(sp.vec + i, coins, nonce++);
+        PQCLEAN_MLKEM512_CLEAN_poly_getnoise_eta1(sp.vec + i, coins, nonce++);
     }
     for (i = 0; i < KYBER_K; i++) {
         printf("CPA_e1[%d]: \n", i);
-        poly_getnoise_eta2(ep.vec + i, coins, nonce++);
+        PQCLEAN_MLKEM512_CLEAN_poly_getnoise_eta2(ep.vec + i, coins, nonce++);
     }
     printf("CPA_e2: \n");
-    poly_getnoise_eta2(&epp, coins, nonce++);
+    PQCLEAN_MLKEM512_CLEAN_poly_getnoise_eta2(&epp, coins, nonce++);
 
     printf("CPA_ntt(r):\n");
-    polyvec_ntt(&sp);
+    PQCLEAN_MLKEM512_CLEAN_polyvec_ntt(&sp);
 
     // matrix-vector multiplication
     for (i = 0; i < KYBER_K; i++) {
-        polyvec_basemul_acc_montgomery(&b.vec[i], &at[i], &sp);
+        PQCLEAN_MLKEM512_CLEAN_polyvec_basemul_acc_montgomery(&b.vec[i], &at[i], &sp);
     }
 
-    polyvec_basemul_acc_montgomery(&v, &pkpv, &sp);
+    PQCLEAN_MLKEM512_CLEAN_polyvec_basemul_acc_montgomery(&v, &pkpv, &sp);
 
-    polyvec_invntt_tomont(&b);
-    poly_invntt_tomont(&v);
+    PQCLEAN_MLKEM512_CLEAN_polyvec_invntt_tomont(&b);
+    PQCLEAN_MLKEM512_CLEAN_poly_invntt_tomont(&v);
 
     printf("CPA_u = Ar+e1 : \n");
-    polyvec_add(&b, &b, &ep);
+    PQCLEAN_MLKEM512_CLEAN_polyvec_add(&b, &b, &ep);
     //--printCoeff("CPA_u[0]",b.vec[0].coeffs);
     //--printCoeff("CPA_u[1]",b.vec[1].coeffs); 
 
     printf("CPA: v = invntt(tt*r)+e2+Decompress(Decode1(m),1) \n");
-    poly_add(&v, &v, &epp);
-    poly_add(&v, &v, &k);
+    PQCLEAN_MLKEM512_CLEAN_poly_add(&v, &v, &epp);
+    PQCLEAN_MLKEM512_CLEAN_poly_add(&v, &v, &k);
     //--printCoeff("CPA_v", v.coeffs);
 
-    polyvec_reduce(&b);
+    PQCLEAN_MLKEM512_CLEAN_polyvec_reduce(&b);
     //--printCoeff("CPA_u[0]_reduce",b.vec[0].coeffs);
     //--printCoeff("CPA_u[1]_reduce",b.vec[1].coeffs);
 
-    poly_reduce(&v);
+    PQCLEAN_MLKEM512_CLEAN_poly_reduce(&v);
     //--printCoeff("CPA_v_reduce", v.coeffs);
 
     printf("CPA_pack_ciphertext:\n");
@@ -354,7 +354,7 @@ void indcpa_enc(uint8_t c[KYBER_INDCPA_BYTES],
 }
 
 /*************************************************
-* Name:        indcpa_dec
+* Name:        PQCLEAN_MLKEM512_CLEAN_indcpa_dec
 *
 * Description: Decryption function of the CPA-secure
 *              public-key encryption scheme underlying Kyber.
@@ -366,7 +366,7 @@ void indcpa_enc(uint8_t c[KYBER_INDCPA_BYTES],
 *              - const uint8_t *sk: pointer to input secret key
 *                                   (of length KYBER_INDCPA_SECRETKEYBYTES)
 **************************************************/
-void indcpa_dec(uint8_t m[KYBER_INDCPA_MSGBYTES],
+void PQCLEAN_MLKEM512_CLEAN_indcpa_dec(uint8_t m[KYBER_INDCPA_MSGBYTES],
                                        const uint8_t c[KYBER_INDCPA_BYTES],
                                        const uint8_t sk[KYBER_INDCPA_SECRETKEYBYTES]) {
     polyvec b, skpv;
@@ -376,12 +376,12 @@ void indcpa_dec(uint8_t m[KYBER_INDCPA_MSGBYTES],
     unpack_sk(&skpv, sk);
 
     printf("CPA_ntt(u):\n");
-    polyvec_ntt(&b);
-    polyvec_basemul_acc_montgomery(&mp, &skpv, &b);
-    poly_invntt_tomont(&mp);
+    PQCLEAN_MLKEM512_CLEAN_polyvec_ntt(&b);
+    PQCLEAN_MLKEM512_CLEAN_polyvec_basemul_acc_montgomery(&mp, &skpv, &b);
+    PQCLEAN_MLKEM512_CLEAN_poly_invntt_tomont(&mp);
 
-    poly_sub(&mp, &v, &mp);
-    poly_reduce(&mp);
+    PQCLEAN_MLKEM512_CLEAN_poly_sub(&mp, &v, &mp);
+    PQCLEAN_MLKEM512_CLEAN_poly_reduce(&mp);
 
-    poly_tomsg(m, &mp);
+    PQCLEAN_MLKEM512_CLEAN_poly_tomsg(m, &mp);
 }

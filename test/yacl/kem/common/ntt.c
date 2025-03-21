@@ -3,7 +3,7 @@
 #include "reduce.h"
 #include <stdint.h>
 
-/* Code to generate zetas and zetas_inv used in the number-theoretic transform:
+/* Code to generate PQCLEAN_MLKEM512_CLEAN_zetas and zetas_inv used in the number-theoretic transform:
 
 #define KYBER_ROOT_OF_UNITY 17
 
@@ -27,16 +27,16 @@ void init_ntt() {
     tmp[i] = fqmul(tmp[i-1],MONT*KYBER_ROOT_OF_UNITY % KYBER_Q);
 
   for(i=0;i<128;i++) {
-    zetas[i] = tmp[tree[i]];
-    if(zetas[i] > KYBER_Q/2)
-      zetas[i] -= KYBER_Q;
-    if(zetas[i] < -KYBER_Q/2)
-      zetas[i] += KYBER_Q;
+    PQCLEAN_MLKEM512_CLEAN_zetas[i] = tmp[tree[i]];
+    if(PQCLEAN_MLKEM512_CLEAN_zetas[i] > KYBER_Q/2)
+      PQCLEAN_MLKEM512_CLEAN_zetas[i] -= KYBER_Q;
+    if(PQCLEAN_MLKEM512_CLEAN_zetas[i] < -KYBER_Q/2)
+      PQCLEAN_MLKEM512_CLEAN_zetas[i] += KYBER_Q;
   }
 }
 */
 
-const int16_t zetas[128] = {
+const int16_t PQCLEAN_MLKEM512_CLEAN_zetas[128] = {
     -1044,  -758,  -359, -1517,  1493,  1422,   287,   202,
     -171,   622,  1577,   182,   962, -1202, -1474,  1468,
     573, -1325,   264,   383,  -829,  1458, -1602,  -130,
@@ -66,25 +66,25 @@ const int16_t zetas[128] = {
 * Returns 16-bit integer congruent to a*b*R^{-1} mod q
 **************************************************/
 static int16_t fqmul(int16_t a, int16_t b) {
-    return montgomery_reduce((int32_t)a * b);
+    return PQCLEAN_MLKEM512_CLEAN_montgomery_reduce((int32_t)a * b);
 }
 
 /*************************************************
-* Name:        ntt
+* Name:        PQCLEAN_MLKEM512_CLEAN_ntt
 *
 * Description: Inplace number-theoretic transform (NTT) in Rq.
 *              input is in standard order, output is in bitreversed order
 *
 * Arguments:   - int16_t r[256]: pointer to input/output vector of elements of Zq
 **************************************************/
-void ntt(int16_t r[256]) {
+void PQCLEAN_MLKEM512_CLEAN_ntt(int16_t r[256]) {
     unsigned int len, start, j, k;
     int16_t t, zeta;
 
     k = 1;
     for (len = 128; len >= 2; len >>= 1) {
         for (start = 0; start < 256; start = j + len) {
-            zeta = zetas[k++];
+            zeta = PQCLEAN_MLKEM512_CLEAN_zetas[k++];
             for (j = start; j < start + len; j++) {
                 t = fqmul(zeta, r[j + len]);
                 r[j + len] = r[j] - t;
@@ -103,7 +103,7 @@ void ntt(int16_t r[256]) {
 *
 * Arguments:   - int16_t r[256]: pointer to input/output vector of elements of Zq
 **************************************************/
-void invntt(int16_t r[256]) {
+void PQCLEAN_MLKEM512_CLEAN_invntt(int16_t r[256]) {
     unsigned int start, len, j, k;
     int16_t t, zeta;
     const int16_t f = 1441; // mont^2/128
@@ -111,10 +111,10 @@ void invntt(int16_t r[256]) {
     k = 127;
     for (len = 2; len <= 128; len <<= 1) {
         for (start = 0; start < 256; start = j + len) {
-            zeta = zetas[k--];
+            zeta = PQCLEAN_MLKEM512_CLEAN_zetas[k--];
             for (j = start; j < start + len; j++) {
                 t = r[j];
-                r[j] = barrett_reduce(t + r[j + len]);
+                r[j] = PQCLEAN_MLKEM512_CLEAN_barrett_reduce(t + r[j + len]);
                 r[j + len] = r[j + len] - t;
                 r[j + len] = fqmul(zeta, r[j + len]);
             }
@@ -127,7 +127,7 @@ void invntt(int16_t r[256]) {
 }
 
 /*************************************************
-* Name:        basemul
+* Name:        PQCLEAN_MLKEM512_CLEAN_basemul
 *
 * Description: Multiplication of polynomials in Zq[X]/(X^2-zeta)
 *              used for multiplication of elements in Rq in NTT domain
@@ -137,7 +137,7 @@ void invntt(int16_t r[256]) {
 *              - const int16_t b[2]: pointer to the second factor
 *              - int16_t zeta: integer defining the reduction polynomial
 **************************************************/
-void basemul(int16_t r[2], const int16_t a[2], const int16_t b[2], int16_t zeta) {
+void PQCLEAN_MLKEM512_CLEAN_basemul(int16_t r[2], const int16_t a[2], const int16_t b[2], int16_t zeta) {
     r[0]  = fqmul(a[1], b[1]);
     r[0]  = fqmul(r[0], zeta);
     r[0] += fqmul(a[0], b[0]);

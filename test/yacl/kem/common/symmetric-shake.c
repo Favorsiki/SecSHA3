@@ -6,7 +6,7 @@
 #include <string.h>
 
 /*************************************************
-* Name:        kyber_shake128_absorb
+* Name:        PQCLEAN_MLKEM512_CLEAN_kyber_shake128_absorb
 *
 * Description: Absorb step of the SHAKE128 specialized for the Kyber context.
 *
@@ -15,7 +15,7 @@
 *              - uint8_t i: additional byte of input
 *              - uint8_t j: additional byte of input
 **************************************************/
-void kyber_shake128_absorb(xof_state *state,
+void PQCLEAN_MLKEM512_CLEAN_kyber_shake128_absorb(xof_state *state,
         const uint8_t seed[KYBER_SYMBYTES],
         uint8_t x,
         uint8_t y) {
@@ -29,7 +29,7 @@ void kyber_shake128_absorb(xof_state *state,
 }
 
 /*************************************************
-* Name:        kyber_shake256_prf
+* Name:        PQCLEAN_MLKEM512_CLEAN_kyber_shake256_prf
 *
 * Description: Usage of SHAKE256 as a PRF, concatenates secret and public input
 *              and then generates outlen bytes of SHAKE256 output
@@ -39,7 +39,7 @@ void kyber_shake128_absorb(xof_state *state,
 *              - const uint8_t *key: pointer to the key (of length KYBER_SYMBYTES)
 *              - uint8_t nonce: single-byte nonce (public PRF input)
 **************************************************/
-void kyber_shake256_prf(uint8_t *out, size_t outlen, const uint8_t key[KYBER_SYMBYTES], uint8_t nonce) {
+void PQCLEAN_MLKEM512_CLEAN_kyber_shake256_prf(uint8_t *out, size_t outlen, const uint8_t key[KYBER_SYMBYTES], uint8_t nonce) {
     uint8_t extkey[KYBER_SYMBYTES + 1];
 
     memcpy(extkey, key, KYBER_SYMBYTES);
@@ -49,7 +49,7 @@ void kyber_shake256_prf(uint8_t *out, size_t outlen, const uint8_t key[KYBER_SYM
 }
 
 /*************************************************
-* Name:        kyber_shake256_prf
+* Name:        PQCLEAN_MLKEM512_CLEAN_kyber_shake256_prf
 *
 * Description: Usage of SHAKE256 as a PRF, concatenates secret and public input
 *              and then generates outlen bytes of SHAKE256 output
@@ -59,7 +59,7 @@ void kyber_shake256_prf(uint8_t *out, size_t outlen, const uint8_t key[KYBER_SYM
 *              - const uint8_t *key: pointer to the key (of length KYBER_SYMBYTES)
 *              - uint8_t nonce: single-byte nonce (public PRF input)
 **************************************************/
-void kyber_shake256_rkprf(uint8_t out[KYBER_SSBYTES], const uint8_t key[KYBER_SYMBYTES], const uint8_t input[KYBER_CIPHERTEXTBYTES]) {
+void PQCLEAN_MLKEM512_CLEAN_kyber_shake256_rkprf(uint8_t out[KYBER_SSBYTES], const uint8_t key[KYBER_SYMBYTES], const uint8_t input[KYBER_CIPHERTEXTBYTES]) {
     shake256incctx s;
 
     shake256_inc_init(&s);

@@ -15,7 +15,9 @@
 #define RNG_BAD_MAXLEN  -1
 #define RNG_BAD_OUTBUF  -2
 #define RNG_BAD_REQ_LEN -3
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 typedef struct {
     unsigned char   buffer[16];
     int             buffer_pos;
@@ -55,5 +57,7 @@ randombytes_init(unsigned char *entropy_input,
 
 void printBstr(char *S, const uint8_t *A, unsigned long long L);
 void printCoeff(char* S, const int16_t* A);
-
+#ifdef __cplusplus
+}
+#endif
 #endif /* rng_h */

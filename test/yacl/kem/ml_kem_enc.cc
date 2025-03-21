@@ -16,9 +16,11 @@
 #include <vector>
 // #include "yacl/base/exception.h"
 #include "ml_kem_enc.h"
+extern "C"
+{
 #include "common/params.h"
-#include "common/kem.h"
-
+#include "common/api.h"
+}
 namespace yacl::crypto {
 
 namespace {

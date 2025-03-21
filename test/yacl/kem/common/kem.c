@@ -9,7 +9,7 @@
 #include <stdint.h>
 #include <string.h>
 /*************************************************
-* Name:        crypto_kem_keypair_derand
+* Name:        PQCLEAN_MLKEM512_CLEAN_crypto_kem_keypair_derand
 *
 * Description: Generates public and private key
 *              for CCA-secure Kyber key encapsulation mechanism
@@ -23,10 +23,10 @@
 **
 * Returns 0 (success)
 **************************************************/
-int crypto_kem_keypair_derand(uint8_t *pk,
+int PQCLEAN_MLKEM512_CLEAN_crypto_kem_keypair_derand(uint8_t *pk,
         uint8_t *sk,
         const uint8_t *coins) {
-    indcpa_keypair_derand(pk, sk, coins);
+    PQCLEAN_MLKEM512_CLEAN_indcpa_keypair_derand(pk, sk, coins);
     memcpy(sk + KYBER_INDCPA_SECRETKEYBYTES, pk, KYBER_PUBLICKEYBYTES);
     hash_h(sk + KYBER_SECRETKEYBYTES - 2 * KYBER_SYMBYTES, pk, KYBER_PUBLICKEYBYTES);
     printf("kem_keypair:\n");
@@ -39,7 +39,7 @@ int crypto_kem_keypair_derand(uint8_t *pk,
 }
 
 /*************************************************
-* Name:        crypto_kem_keypair
+* Name:        PQCLEAN_MLKEM512_CLEAN_crypto_kem_keypair
 *
 * Description: Generates public and private key
 *              for CCA-secure Kyber key encapsulation mechanism
@@ -51,16 +51,16 @@ int crypto_kem_keypair_derand(uint8_t *pk,
 *
 * Returns 0 (success)
 **************************************************/
-int crypto_kem_keypair(uint8_t *pk,
+int PQCLEAN_MLKEM512_CLEAN_crypto_kem_keypair(uint8_t *pk,
         uint8_t *sk) {
     uint8_t coins[2 * KYBER_SYMBYTES];
     randombytes(coins, 2 * KYBER_SYMBYTES);
-    crypto_kem_keypair_derand(pk, sk, coins);
+    PQCLEAN_MLKEM512_CLEAN_crypto_kem_keypair_derand(pk, sk, coins);
     return 0;
 }
 
 /*************************************************
-* Name:        crypto_kem_enc_derand
+* Name:        PQCLEAN_MLKEM512_CLEAN_crypto_kem_enc_derand
 *
 * Description: Generates cipher text and shared
 *              secret for given public key
@@ -76,7 +76,7 @@ int crypto_kem_keypair(uint8_t *pk,
 **
 * Returns 0 (success)
 **************************************************/
-int crypto_kem_enc_derand(uint8_t *ct,
+int PQCLEAN_MLKEM512_CLEAN_crypto_kem_enc_derand(uint8_t *ct,
         uint8_t *ss,
         const uint8_t *pk,
         const uint8_t *coins) {
@@ -95,7 +95,7 @@ int crypto_kem_enc_derand(uint8_t *ct,
     //--printBstr("kem_r", kr+KYBER_SYMBYTES, KYBER_SYMBYTES);  
 
     /* coins are in kr+KYBER_SYMBYTES */
-    indcpa_enc(ct, buf, pk, kr + KYBER_SYMBYTES);
+    PQCLEAN_MLKEM512_CLEAN_indcpa_enc(ct, buf, pk, kr + KYBER_SYMBYTES);
     //--printBstr("kem_c", ct, KYBER_CIPHERTEXTBYTES);
 
     memcpy(ss, kr, KYBER_SYMBYTES);
@@ -103,7 +103,7 @@ int crypto_kem_enc_derand(uint8_t *ct,
 }
 
 /*************************************************
-* Name:        crypto_kem_enc
+* Name:        PQCLEAN_MLKEM512_CLEAN_crypto_kem_enc
 *
 * Description: Generates cipher text and shared
 *              secret for given public key
@@ -117,18 +117,18 @@ int crypto_kem_enc_derand(uint8_t *ct,
 *
 * Returns 0 (success)
 **************************************************/
-int crypto_kem_enc(uint8_t *ct,
+int PQCLEAN_MLKEM512_CLEAN_crypto_kem_enc(uint8_t *ct,
         uint8_t *ss,
         const uint8_t *pk) {
     uint8_t coins[KYBER_SYMBYTES];
     randombytes(coins, KYBER_SYMBYTES);
     //--printBstr("kem_enc_m", coins, KYBER_SYMBYTES);
-    crypto_kem_enc_derand(ct, ss, pk, coins);
+    PQCLEAN_MLKEM512_CLEAN_crypto_kem_enc_derand(ct, ss, pk, coins);
     return 0;
 }
 
 /*************************************************
-* Name:        crypto_kem_dec
+* Name:        PQCLEAN_MLKEM512_CLEAN_crypto_kem_dec
 *
 * Description: Generates shared secret for given
 *              cipher text and private key
@@ -144,7 +144,7 @@ int crypto_kem_enc(uint8_t *ct,
 *
 * On failure, ss will contain a pseudo-random value.
 **************************************************/
-int crypto_kem_dec(uint8_t *ss,
+int PQCLEAN_MLKEM512_CLEAN_crypto_kem_dec(uint8_t *ss,
         const uint8_t *ct,
         const uint8_t *sk) {
     int fail;
@@ -155,7 +155,7 @@ int crypto_kem_dec(uint8_t *ss,
     const uint8_t *pk = sk + KYBER_INDCPA_SECRETKEYBYTES;
 
     printf("KEM: KYBER.CPAPKE.Dec(dk,c) : \n");
-    indcpa_dec(buf, ct, sk);
+    PQCLEAN_MLKEM512_CLEAN_indcpa_dec(buf, ct, sk);
     //--printBstr("KEM: m'", buf, KYBER_SYMBYTES);
     /* Multitarget countermeasure for coins + contributory KEM */
   
@@ -168,10 +168,10 @@ int crypto_kem_dec(uint8_t *ss,
 
     printf("KEM: c' = KYBER.CPAPKE.Enc(pk,m',r') : \n");
     /* coins are in kr+KYBER_SYMBYTES */
-    indcpa_enc(cmp, buf, pk, kr + KYBER_SYMBYTES);
+    PQCLEAN_MLKEM512_CLEAN_indcpa_enc(cmp, buf, pk, kr + KYBER_SYMBYTES);
 
     printf("KEM: compare c' and c : \n");
-    fail = verify(ct, cmp, KYBER_CIPHERTEXTBYTES);
+    fail = PQCLEAN_MLKEM512_CLEAN_verify(ct, cmp, KYBER_CIPHERTEXTBYTES);
     printf("KEM: fail = %d\n", fail);
 
     /* Compute rejection key */
@@ -180,7 +180,7 @@ int crypto_kem_dec(uint8_t *ss,
     //--printBstr("KEM : K-", ss, KYBER_SYMBYTES);
  
     /* Copy true key to return buffer if fail is false */
-    cmov(ss, kr, KYBER_SYMBYTES, (uint8_t) (1 - fail));
+    PQCLEAN_MLKEM512_CLEAN_cmov(ss, kr, KYBER_SYMBYTES, (uint8_t) (1 - fail));
     printf("Final K:\n");
     //--printBstr("KEM : K", ss, KYBER_SYMBYTES);
 

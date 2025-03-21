@@ -1,10 +1,8 @@
-#ifndef PARAMS_H
-#define PARAMS_H
-
-
-
-
-
+#ifndef PQCLEAN_MLKEM512_CLEAN_PARAMS_H
+#define PQCLEAN_MLKEM512_CLEAN_PARAMS_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 /* Don't change parameters below this line */
 
 #define KYBER_N 256
@@ -32,5 +30,7 @@
 /* 32 bytes of additional space to save H(pk) */
 #define KYBER_SECRETKEYBYTES  (KYBER_INDCPA_SECRETKEYBYTES + KYBER_INDCPA_PUBLICKEYBYTES + 2*KYBER_SYMBYTES)
 #define KYBER_CIPHERTEXTBYTES (KYBER_INDCPA_BYTES)
-
+#ifdef __cplusplus
+}
+#endif
 #endif

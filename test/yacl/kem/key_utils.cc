@@ -13,17 +13,20 @@
 // limitations under the License.
 
 #include "key_utils.h"
-#include "common/kem.h"
+extern "C"
+{
+#include "common/api.h"
+}
 
 namespace yacl::crypto {
 
 namespace {
 
     std::pair<std::vector<uint8_t>, std::vector<uint8_t> > GenMLkemKeyPairToPemBuf() {
-        std::vector<uint8_t> pk;
-        std::vector<uint8_t> sk;
-        crypto_kem_keypair(pk.data(), sk.data());
-        return {pk, sk};
+        std::vector<uint8_t> ek;
+        std::vector<uint8_t> dk;
+        crypto_kem_keypair(ek.data(), dk.data());
+        return {ek, dk};
     }
-
-}}
+}
+}

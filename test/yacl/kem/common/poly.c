@@ -9,7 +9,7 @@
 #include <stdint.h>
 
 /*************************************************
-* Name:        poly_compress
+* Name:        PQCLEAN_MLKEM512_CLEAN_poly_compress
 *
 * Description: Compression and subsequent serialization of a polynomial
 *
@@ -17,7 +17,7 @@
 *                            (of length KYBER_POLYCOMPRESSEDBYTES)
 *              - const poly *a: pointer to input polynomial
 **************************************************/
-void poly_compress(uint8_t r[KYBER_POLYCOMPRESSEDBYTES], const poly *a) {
+void PQCLEAN_MLKEM512_CLEAN_poly_compress(uint8_t r[KYBER_POLYCOMPRESSEDBYTES], const poly *a) {
     unsigned int i, j;
     int16_t u;
     uint32_t d0;
@@ -46,16 +46,16 @@ void poly_compress(uint8_t r[KYBER_POLYCOMPRESSEDBYTES], const poly *a) {
 }
 
 /*************************************************
-* Name:        poly_decompress
+* Name:        PQCLEAN_MLKEM512_CLEAN_poly_decompress
 *
 * Description: De-serialization and subsequent decompression of a polynomial;
-*              approximate inverse of poly_compress
+*              approximate inverse of PQCLEAN_MLKEM512_CLEAN_poly_compress
 *
 * Arguments:   - poly *r: pointer to output polynomial
 *              - const uint8_t *a: pointer to input byte array
 *                                  (of length KYBER_POLYCOMPRESSEDBYTES bytes)
 **************************************************/
-void poly_decompress(poly *r, const uint8_t a[KYBER_POLYCOMPRESSEDBYTES]) {
+void PQCLEAN_MLKEM512_CLEAN_poly_decompress(poly *r, const uint8_t a[KYBER_POLYCOMPRESSEDBYTES]) {
     size_t i;
 
     for (i = 0; i < KYBER_N / 2; i++) {
@@ -66,7 +66,7 @@ void poly_decompress(poly *r, const uint8_t a[KYBER_POLYCOMPRESSEDBYTES]) {
 }
 
 /*************************************************
-* Name:        poly_tobytes
+* Name:        PQCLEAN_MLKEM512_CLEAN_poly_tobytes
 *
 * Description: Serialization of a polynomial
 *
@@ -74,7 +74,7 @@ void poly_decompress(poly *r, const uint8_t a[KYBER_POLYCOMPRESSEDBYTES]) {
 *                            (needs space for KYBER_POLYBYTES bytes)
 *              - const poly *a: pointer to input polynomial
 **************************************************/
-void poly_tobytes(uint8_t r[KYBER_POLYBYTES], const poly *a) {
+void PQCLEAN_MLKEM512_CLEAN_poly_tobytes(uint8_t r[KYBER_POLYBYTES], const poly *a) {
     size_t i;
     uint16_t t0, t1;
 
@@ -91,16 +91,16 @@ void poly_tobytes(uint8_t r[KYBER_POLYBYTES], const poly *a) {
 }
 
 /*************************************************
-* Name:        poly_frombytes
+* Name:        PQCLEAN_MLKEM512_CLEAN_poly_frombytes
 *
 * Description: De-serialization of a polynomial;
-*              inverse of poly_tobytes
+*              inverse of PQCLEAN_MLKEM512_CLEAN_poly_tobytes
 *
 * Arguments:   - poly *r: pointer to output polynomial
 *              - const uint8_t *a: pointer to input byte array
 *                                  (of KYBER_POLYBYTES bytes)
 **************************************************/
-void poly_frombytes(poly *r, const uint8_t a[KYBER_POLYBYTES]) {
+void PQCLEAN_MLKEM512_CLEAN_poly_frombytes(poly *r, const uint8_t a[KYBER_POLYBYTES]) {
     size_t i;
     for (i = 0; i < KYBER_N / 2; i++) {
         r->coeffs[2 * i]   = ((a[3 * i + 0] >> 0) | ((uint16_t)a[3 * i + 1] << 8)) & 0xFFF;
@@ -109,20 +109,20 @@ void poly_frombytes(poly *r, const uint8_t a[KYBER_POLYBYTES]) {
 }
 
 /*************************************************
-* Name:        poly_frommsg
+* Name:        PQCLEAN_MLKEM512_CLEAN_poly_frommsg
 *
 * Description: Convert 32-byte message to polynomial
 *
 * Arguments:   - poly *r: pointer to output polynomial
 *              - const uint8_t *msg: pointer to input message
 **************************************************/
-void poly_frommsg(poly *r, const uint8_t msg[KYBER_INDCPA_MSGBYTES]) {
+void PQCLEAN_MLKEM512_CLEAN_poly_frommsg(poly *r, const uint8_t msg[KYBER_INDCPA_MSGBYTES]) {
     size_t i, j;
 
     for (i = 0; i < KYBER_N / 8; i++) {
         for (j = 0; j < 8; j++) {
             r->coeffs[8 * i + j] = 0;
-            cmov_int16(r->coeffs + 8 * i + j, ((KYBER_Q + 1) / 2), (msg[i] >> j) & 1);
+            PQCLEAN_MLKEM512_CLEAN_cmov_int16(r->coeffs + 8 * i + j, ((KYBER_Q + 1) / 2), (msg[i] >> j) & 1);
         }
     }
     //--printBstr("msg_input", (unsigned char *)msg, KYBER_INDCPA_MSGBYTES);
@@ -130,14 +130,14 @@ void poly_frommsg(poly *r, const uint8_t msg[KYBER_INDCPA_MSGBYTES]) {
 }
 
 /*************************************************
-* Name:        poly_tomsg
+* Name:        PQCLEAN_MLKEM512_CLEAN_poly_tomsg
 *
 * Description: Convert polynomial to 32-byte message
 *
 * Arguments:   - uint8_t *msg: pointer to output message
 *              - const poly *a: pointer to input polynomial
 **************************************************/
-void poly_tomsg(uint8_t msg[KYBER_INDCPA_MSGBYTES], const poly *a) {
+void PQCLEAN_MLKEM512_CLEAN_poly_tomsg(uint8_t msg[KYBER_INDCPA_MSGBYTES], const poly *a) {
     unsigned int i, j;
     uint32_t t;
     //--printCoeff("[poly_tomsg]", a->coeffs);
@@ -160,7 +160,7 @@ void poly_tomsg(uint8_t msg[KYBER_INDCPA_MSGBYTES], const poly *a) {
 }
 
 /*************************************************
-* Name:        poly_getnoise_eta1
+* Name:        PQCLEAN_MLKEM512_CLEAN_poly_getnoise_eta1
 *
 * Description: Sample a polynomial deterministically from a seed and a nonce,
 *              with output polynomial close to centered binomial distribution
@@ -171,18 +171,18 @@ void poly_tomsg(uint8_t msg[KYBER_INDCPA_MSGBYTES], const poly *a) {
 *                                     (of length KYBER_SYMBYTES bytes)
 *              - uint8_t nonce: one-byte input nonce
 **************************************************/
-void poly_getnoise_eta1(poly *r, const uint8_t seed[KYBER_SYMBYTES], uint8_t nonce) {
+void PQCLEAN_MLKEM512_CLEAN_poly_getnoise_eta1(poly *r, const uint8_t seed[KYBER_SYMBYTES], uint8_t nonce) {
     uint8_t buf[KYBER_ETA1 * KYBER_N / 4];
     printf("CPA_prf:\n");
     prf(buf, sizeof(buf), seed, nonce);
     printf("CPA_cbd1:\n");
-    poly_cbd_eta1(r, buf);
+    PQCLEAN_MLKEM512_CLEAN_poly_cbd_eta1(r, buf);
     //--printBstr("CPA_cbd1_input", buf, sizeof(buf));
     //--printCoeff("[CPA_cbd1_output]", r->coeffs);
 }
 
 /*************************************************
-* Name:        poly_getnoise_eta2
+* Name:        PQCLEAN_MLKEM512_CLEAN_poly_getnoise_eta2
 *
 * Description: Sample a polynomial deterministically from a seed and a nonce,
 *              with output polynomial close to centered binomial distribution
@@ -193,19 +193,19 @@ void poly_getnoise_eta1(poly *r, const uint8_t seed[KYBER_SYMBYTES], uint8_t non
 *                                     (of length KYBER_SYMBYTES bytes)
 *              - uint8_t nonce: one-byte input nonce
 **************************************************/
-void poly_getnoise_eta2(poly *r, const uint8_t seed[KYBER_SYMBYTES], uint8_t nonce) {
+void PQCLEAN_MLKEM512_CLEAN_poly_getnoise_eta2(poly *r, const uint8_t seed[KYBER_SYMBYTES], uint8_t nonce) {
     uint8_t buf[KYBER_ETA2 * KYBER_N / 4];
     printf("CPA_prf:\n");
     prf(buf, sizeof(buf), seed, nonce);
     printf("CPA_cbd2:\n");
-    poly_cbd_eta2(r, buf);
+    PQCLEAN_MLKEM512_CLEAN_poly_cbd_eta2(r, buf);
     //--printBstr("CPA_cbd2_input", buf, sizeof(buf));
     //--printCoeff("[CPA_cbd2_output]", r->coeffs);
 }
 
 
 /*************************************************
-* Name:        poly_ntt
+* Name:        PQCLEAN_MLKEM512_CLEAN_poly_ntt
 *
 * Description: Computes negacyclic number-theoretic transform (NTT) of
 *              a polynomial in place;
@@ -213,15 +213,15 @@ void poly_getnoise_eta2(poly *r, const uint8_t seed[KYBER_SYMBYTES], uint8_t non
 *
 * Arguments:   - uint16_t *r: pointer to in/output polynomial
 **************************************************/
-void poly_ntt(poly *r) {
-    ntt(r->coeffs);
+void PQCLEAN_MLKEM512_CLEAN_poly_ntt(poly *r) {
+    PQCLEAN_MLKEM512_CLEAN_ntt(r->coeffs);
     //--printCoeff("[CPA_poly_ntt_output]", r->coeffs);
-    poly_reduce(r);
+    PQCLEAN_MLKEM512_CLEAN_poly_reduce(r);
     //--printCoeff("[CPA_poly_ntt_output_reduce]", r->coeffs);
 }
 
 /*************************************************
-* Name:        poly_invntt_tomont
+* Name:        PQCLEAN_MLKEM512_CLEAN_poly_invntt_tomont
 *
 * Description: Computes inverse of negacyclic number-theoretic transform (NTT)
 *              of a polynomial in place;
@@ -229,13 +229,13 @@ void poly_ntt(poly *r) {
 *
 * Arguments:   - uint16_t *a: pointer to in/output polynomial
 **************************************************/
-void poly_invntt_tomont(poly *r) {
-    invntt(r->coeffs);
+void PQCLEAN_MLKEM512_CLEAN_poly_invntt_tomont(poly *r) {
+    PQCLEAN_MLKEM512_CLEAN_invntt(r->coeffs);
     //--printCoeff("[CPA_poly_invntt_output]", r->coeffs);
 }
 
 /*************************************************
-* Name:        poly_basemul_montgomery
+* Name:        PQCLEAN_MLKEM512_CLEAN_poly_basemul_montgomery
 *
 * Description: Multiplication of two polynomials in NTT domain
 *
@@ -243,47 +243,47 @@ void poly_invntt_tomont(poly *r) {
 *              - const poly *a: pointer to first input polynomial
 *              - const poly *b: pointer to second input polynomial
 **************************************************/
-void poly_basemul_montgomery(poly *r, const poly *a, const poly *b) {
+void PQCLEAN_MLKEM512_CLEAN_poly_basemul_montgomery(poly *r, const poly *a, const poly *b) {
     size_t i;
     for (i = 0; i < KYBER_N / 4; i++) {
-        basemul(&r->coeffs[4 * i], &a->coeffs[4 * i], &b->coeffs[4 * i], zetas[64 + i]);
-        basemul(&r->coeffs[4 * i + 2], &a->coeffs[4 * i + 2], &b->coeffs[4 * i + 2], -zetas[64 + i]);
+        PQCLEAN_MLKEM512_CLEAN_basemul(&r->coeffs[4 * i], &a->coeffs[4 * i], &b->coeffs[4 * i], PQCLEAN_MLKEM512_CLEAN_zetas[64 + i]);
+        PQCLEAN_MLKEM512_CLEAN_basemul(&r->coeffs[4 * i + 2], &a->coeffs[4 * i + 2], &b->coeffs[4 * i + 2], -PQCLEAN_MLKEM512_CLEAN_zetas[64 + i]);
     }
 }
 
 /*************************************************
-* Name:        poly_tomont
+* Name:        PQCLEAN_MLKEM512_CLEAN_poly_tomont
 *
 * Description: Inplace conversion of all coefficients of a polynomial
 *              from normal domain to Montgomery domain
 *
 * Arguments:   - poly *r: pointer to input/output polynomial
 **************************************************/
-void poly_tomont(poly *r) {
+void PQCLEAN_MLKEM512_CLEAN_poly_tomont(poly *r) {
     size_t i;
     const int16_t f = (1ULL << 32) % KYBER_Q;
     for (i = 0; i < KYBER_N; i++) {
-        r->coeffs[i] = montgomery_reduce((int32_t)r->coeffs[i] * f);
+        r->coeffs[i] = PQCLEAN_MLKEM512_CLEAN_montgomery_reduce((int32_t)r->coeffs[i] * f);
     }
 }
 
 /*************************************************
-* Name:        poly_reduce
+* Name:        PQCLEAN_MLKEM512_CLEAN_poly_reduce
 *
 * Description: Applies Barrett reduction to all coefficients of a polynomial
 *              for details of the Barrett reduction see comments in reduce.c
 *
 * Arguments:   - poly *r: pointer to input/output polynomial
 **************************************************/
-void poly_reduce(poly *r) {
+void PQCLEAN_MLKEM512_CLEAN_poly_reduce(poly *r) {
     size_t i;
     for (i = 0; i < KYBER_N; i++) {
-        r->coeffs[i] = barrett_reduce(r->coeffs[i]);
+        r->coeffs[i] = PQCLEAN_MLKEM512_CLEAN_barrett_reduce(r->coeffs[i]);
     }
 }
 
 /*************************************************
-* Name:        poly_add
+* Name:        PQCLEAN_MLKEM512_CLEAN_poly_add
 *
 * Description: Add two polynomials; no modular reduction is performed
 *
@@ -291,7 +291,7 @@ void poly_reduce(poly *r) {
 *            - const poly *a: pointer to first input polynomial
 *            - const poly *b: pointer to second input polynomial
 **************************************************/
-void poly_add(poly *r, const poly *a, const poly *b) {
+void PQCLEAN_MLKEM512_CLEAN_poly_add(poly *r, const poly *a, const poly *b) {
     size_t i;
     for (i = 0; i < KYBER_N; i++) {
         r->coeffs[i] = a->coeffs[i] + b->coeffs[i];
@@ -299,7 +299,7 @@ void poly_add(poly *r, const poly *a, const poly *b) {
 }
 
 /*************************************************
-* Name:        poly_sub
+* Name:        PQCLEAN_MLKEM512_CLEAN_poly_sub
 *
 * Description: Subtract two polynomials; no modular reduction is performed
 *
@@ -307,7 +307,7 @@ void poly_add(poly *r, const poly *a, const poly *b) {
 *            - const poly *a: pointer to first input polynomial
 *            - const poly *b: pointer to second input polynomial
 **************************************************/
-void poly_sub(poly *r, const poly *a, const poly *b) {
+void PQCLEAN_MLKEM512_CLEAN_poly_sub(poly *r, const poly *a, const poly *b) {
     size_t i;
     for (i = 0; i < KYBER_N; i++) {
         r->coeffs[i] = a->coeffs[i] - b->coeffs[i];

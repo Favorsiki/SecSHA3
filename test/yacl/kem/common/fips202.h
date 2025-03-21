@@ -3,6 +3,9 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define SHAKE128_RATE 168
 #define SHAKE256_RATE 136
@@ -162,5 +165,7 @@ void sha3_512_inc_ctx_release(sha3_512incctx *state);
 
 /* One-stop SHA3-512 shop */
 void sha3_512(uint8_t *output, const uint8_t *input, size_t inlen);
-
+#ifdef __cplusplus
+}
+#endif
 #endif
