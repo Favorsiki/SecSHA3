@@ -1,10 +1,11 @@
 #ifndef PQCLEAN_MLKEM512_CLEAN_NTT_H
 #define PQCLEAN_MLKEM512_CLEAN_NTT_H
-#include "params.h"
-#include <stdint.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "params.h"
+#include <stdint.h>
 extern const int16_t PQCLEAN_MLKEM512_CLEAN_zetas[128];
 
 void PQCLEAN_MLKEM512_CLEAN_ntt(int16_t r[256]);

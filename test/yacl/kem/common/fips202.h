@@ -1,11 +1,12 @@
 #ifndef FIPS202_H
 #define FIPS202_H
 
-#include <stddef.h>
-#include <stdint.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include <stddef.h>
+#include <stdint.h>
 
 #define SHAKE128_RATE 168
 #define SHAKE256_RATE 136

@@ -1,11 +1,12 @@
 #ifndef PQCLEAN_MLKEM512_CLEAN_POLYVEC_H
 #define PQCLEAN_MLKEM512_CLEAN_POLYVEC_H
-#include "params.h"
-#include "poly.h"
-#include <stdint.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "params.h"
+#include "poly.h"
+#include <stdint.h>
 typedef struct {
     poly vec[KYBER_K];
 } polyvec;

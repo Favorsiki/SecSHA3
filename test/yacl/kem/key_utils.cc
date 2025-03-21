@@ -20,13 +20,15 @@ extern "C"
 
 namespace yacl::crypto {
 
-namespace {
-
     std::pair<std::vector<uint8_t>, std::vector<uint8_t> > GenMLkemKeyPairToPemBuf() {
-        std::vector<uint8_t> ek;
-        std::vector<uint8_t> dk;
+        // uint8_t ek[CRYPTO_PUBLICKEYBYTES], dk[CRYPTO_PUBLICKEYBYTES];
+        // crypto_kem_keypair(ek, dk);
+        // std::vector<uint8_t> vec_ek(ek, ek+CRYPTO_PUBLICKEYBYTES);
+        // std::vector<uint8_t> vec_dk(dk, dk+CRYPTO_PUBLICKEYBYTES);
+        std::vector<uint8_t> ek(CRYPTO_PUBLICKEYBYTES);
+        std::vector<uint8_t> dk(CRYPTO_SECRETKEYBYTES);
         crypto_kem_keypair(ek.data(), dk.data());
         return {ek, dk};
     }
-}
+
 }

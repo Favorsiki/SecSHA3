@@ -1,13 +1,15 @@
 #ifndef PQCLEAN_MLKEM512_CLEAN_SYMMETRIC_H
 #define PQCLEAN_MLKEM512_CLEAN_SYMMETRIC_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "fips202.h"
 #include "params.h"
 #include <stddef.h>
 #include <stdint.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 typedef shake128ctx xof_state;
 
 void PQCLEAN_MLKEM512_CLEAN_kyber_shake128_absorb(xof_state *s,

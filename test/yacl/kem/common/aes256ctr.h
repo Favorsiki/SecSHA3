@@ -1,12 +1,12 @@
 #ifndef AES256CTR_H
 #define AES256CTR_H
 
-#include <stddef.h>
-#include <stdint.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include <stddef.h>
+#include <stdint.h>
 
 #define AES256CTR_BLOCKBYTES 64
 

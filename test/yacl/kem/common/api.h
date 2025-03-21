@@ -1,6 +1,9 @@
 #ifndef PQCLEAN_MLKEM512_CLEAN_API_H
 #define PQCLEAN_MLKEM512_CLEAN_API_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include <stdint.h>
 #include "params.h"
 #include "kem.h"
@@ -11,9 +14,6 @@
 // #define PQCLEAN_MLKEM512_CLEAN_CRYPTO_BYTES           32
 // #define PQCLEAN_MLKEM512_CLEAN_CRYPTO_ALGNAME "ML-KEM-512"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 #define CRYPTO_SECRETKEYBYTES  KYBER_SECRETKEYBYTES
 #define CRYPTO_PUBLICKEYBYTES  KYBER_PUBLICKEYBYTES
 #define CRYPTO_CIPHERTEXTBYTES KYBER_CIPHERTEXTBYTES

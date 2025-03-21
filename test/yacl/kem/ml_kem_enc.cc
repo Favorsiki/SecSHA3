@@ -41,7 +41,7 @@ std::pair<std::vector<uint8_t>, std::vector<uint8_t> > MLkemEncaps::Encaps()  {
 }
 
 std::vector<uint8_t> MLkemDecaps::Decaps(std::vector<uint8_t> ciphertext) {
-    std::vector<uint8_t> ss1;
+    std::vector<uint8_t> ss1(KYBER_SSBYTES);
     crypto_kem_dec(ss1.data(), ciphertext.data(), dk_.data());
     return ss1;
 }

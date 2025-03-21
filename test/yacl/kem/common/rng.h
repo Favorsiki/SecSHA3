@@ -8,6 +8,10 @@
 #ifndef rng_h
 #define rng_h
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdio.h>
 #include <stdint.h>
 
@@ -15,9 +19,7 @@
 #define RNG_BAD_MAXLEN  -1
 #define RNG_BAD_OUTBUF  -2
 #define RNG_BAD_REQ_LEN -3
-#ifdef __cplusplus
-extern "C" {
-#endif
+
 typedef struct {
     unsigned char   buffer[16];
     int             buffer_pos;
