@@ -29,16 +29,13 @@ namespace {
 // constexpr int kRsaPadding = RSA_PKCS1_OAEP_PADDING;
 }  // namespace
 
-std::vector<std::vector<uint8_t> > MLkemEncaps::Encaps()  {
+std::pair<std::vector<uint8_t>, std::vector<uint8_t> > MLkemEncaps::Encaps()  {
     std::vector<uint8_t> ss(KYBER_SSBYTES);
     std::vector<uint8_t> ct(KYBER_CIPHERTEXTBYTES);
-    std::vector<std::vector<uint8_t>> out;
 
     crypto_kem_enc(ct.data(), ss.data(), ek_.data());
 
-    out.push_back(ss);
-    out.push_back(ct);
-    return out;
+    return {ss, ct};
 }
 
 std::vector<uint8_t> MLkemDecaps::Decaps(std::vector<uint8_t> ciphertext) {

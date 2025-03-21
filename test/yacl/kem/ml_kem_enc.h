@@ -38,7 +38,7 @@ class MLkemEncaps : public KemEncaps{
 
   KemScheme GetScheme() const override { return scheme_; }
   //std::vector<uint8_t> Encaps(ByteContainerView plaintext) override;
-  std::vector<std::vector<uint8_t> > Encaps() override;
+  std::pair<std::vector<uint8_t>, std::vector<uint8_t> > Encaps() override;
 
  private:
   const std::vector<uint8_t> ek_;

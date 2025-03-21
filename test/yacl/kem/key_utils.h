@@ -1,4 +1,4 @@
-// Copyright 2019 Ant Group Co., Ltd.
+// Copyright 2023 Ant Group Co., Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,26 +15,11 @@
 #pragma once
 
 #include <vector>
-
-// #include "yacl/base/byte_container_view.h"
+#include <stdint.h>
 
 namespace yacl::crypto {
 
-enum class KemScheme { UNKNOWN, MLKEM512 };
+std::pair<std::vector<uint8_t>, std::vector<uint8_t> > GenMLkemKeyPairToPemBuf();
 
-class KemEncaps {
- public:
-  virtual ~KemEncaps() = default;
-  virtual KemScheme GetScheme() const = 0;
-  virtual std::pair<std::vector<uint8_t>, std::vector<uint8_t> > Encaps() = 0;
-};
 
-class KemDecaps {
- public:
-  virtual ~KemDecaps() = default;
-  virtual KemScheme GetScheme() const = 0;
-  //virtual std::vector<uint8_t> Decaps(ByteContainerView ciphertext) = 0;
-  virtual std::vector<uint8_t> Decaps(std::vector<uint8_t> ciphertext) = 0;
-};
-
-}  // namespace yacl::crypto
+}
