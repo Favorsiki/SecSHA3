@@ -19,38 +19,43 @@
 #include <utility>
 #include <vector>
 
-#include "yacl/crypto/key_utils.h"
-#include "yacl/crypto/pqc/kem/kem_interface.h"
-#include "yacl/secparam.h"
+// #include "yacl/crypto/key_utils.h"
+// #include "yacl/secparam.h"
+// #include "yacl/crypto/pqc/kem/kem_interface.h"
+
+
+#include "kem_interface.h"
 
 /* security parameter declaration */
-YACL_MODULE_DECLARE("ml_kem_enc", SecParam::C::UNKNOWN, SecParam::S::UNKNOWN);
+// YACL_MODULE_DECLARE("ml_kem_enc", SecParam::C::UNKNOWN, SecParam::S::UNKNOWN);
 
 namespace yacl::crypto {
 
 // RSA with OAEP
 class MLkemEncaps : public KemEncaps{
  public:
-  explicit MLkemEncryptor(vector<uint8_t>& ek) : ek_(std::move(ek)) {}
+  explicit MLkemEncaps(std::vector<uint8_t>& ek) : ek_(std::move(ek)) {}
 
   KemScheme GetScheme() const override { return scheme_; }
-  std::vector<uint8_t> Encaps(ByteContainerView plaintext) override;
+  //std::vector<uint8_t> Encaps(ByteContainerView plaintext) override;
+  std::vector<std::vector<uint8_t> > Encaps() override;
 
  private:
-  const vector<uint8_t> ek_;
+  const std::vector<uint8_t> ek_;
   const KemScheme scheme_ = KemScheme::MLKEM512;
 };
 
 class MLkemDecaps : public KemDecaps {
  public:
-  explicit MLkemDecryptor(vector<uint8_t>& dk) : dk_(std::move(dk)) {}
+  explicit MLkemDecaps(std::vector<uint8_t>& dk) : dk_(std::move(dk)) {}
 
 
   KemScheme GetScheme() const override { return scheme_; }
-  std::vector<uint8_t> Decaps(ByteContainerView ciphertext) override;
+  //std::vector<uint8_t> Decaps(ByteContainerView ciphertext) override;
+  std::vector<uint8_t> Decaps(std::vector<uint8_t> ciphertext) override;
 
  private:
-  const vector<uint8_t> dk_;
+  const std::vector<uint8_t> dk_;
   const KemScheme scheme_ = KemScheme::MLKEM512;
 };
 

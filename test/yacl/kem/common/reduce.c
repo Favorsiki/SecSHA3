@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 /*************************************************
-* Name:        PQCLEAN_MLKEM512_CLEAN_montgomery_reduce
+* Name:        montgomery_reduce
 *
 * Description: Montgomery reduction; given a 32-bit integer a, computes
 *              16-bit integer congruent to a * R^-1 mod q, where R=2^16
@@ -13,7 +13,7 @@
 *
 * Returns:     integer in {-q+1,...,q-1} congruent to a * R^-1 modulo q.
 **************************************************/
-int16_t PQCLEAN_MLKEM512_CLEAN_montgomery_reduce(int32_t a) {
+int16_t montgomery_reduce(int32_t a) {
     int16_t t;
 
     t = (int16_t)a * QINV;
@@ -22,7 +22,7 @@ int16_t PQCLEAN_MLKEM512_CLEAN_montgomery_reduce(int32_t a) {
 }
 
 /*************************************************
-* Name:        PQCLEAN_MLKEM512_CLEAN_barrett_reduce
+* Name:        barrett_reduce
 *
 * Description: Barrett reduction; given a 16-bit integer a, computes
 *              centered representative congruent to a mod q in {-(q-1)/2,...,(q-1)/2}
@@ -31,7 +31,7 @@ int16_t PQCLEAN_MLKEM512_CLEAN_montgomery_reduce(int32_t a) {
 *
 * Returns:     integer in {-(q-1)/2,...,(q-1)/2} congruent to a modulo q.
 **************************************************/
-int16_t PQCLEAN_MLKEM512_CLEAN_barrett_reduce(int16_t a) {
+int16_t barrett_reduce(int16_t a) {
     int16_t t;
     const int16_t v = ((1 << 26) + KYBER_Q / 2) / KYBER_Q;
 

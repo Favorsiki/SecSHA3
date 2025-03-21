@@ -16,7 +16,7 @@
 
 #include <vector>
 
-#include "yacl/base/byte_container_view.h"
+// #include "yacl/base/byte_container_view.h"
 
 namespace yacl::crypto {
 
@@ -26,14 +26,15 @@ class KemEncaps {
  public:
   virtual ~KemEncaps() = default;
   virtual KemScheme GetScheme() const = 0;
-  virtual std::vector<uint8_t> Encaps(ByteContainerView plaintext) = 0;
-}
+  virtual std::vector<std::vector<uint8_t> > Encaps() = 0;
+};
 
 class KemDecaps {
  public:
   virtual ~KemDecaps() = default;
   virtual KemScheme GetScheme() const = 0;
-  virtual std::vector<uint8_t> Decaps(ByteContainerView ciphertext) = 0;
+  //virtual std::vector<uint8_t> Decaps(ByteContainerView ciphertext) = 0;
+  virtual std::vector<uint8_t> Decaps(std::vector<uint8_t> ciphertext) = 0;
 };
 
 }  // namespace yacl::crypto

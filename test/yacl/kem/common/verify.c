@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 /*************************************************
-* Name:        PQCLEAN_MLKEM512_CLEAN_verify
+* Name:        verify
 *
 * Description: Compare two arrays for equality in constant time.
 *
@@ -14,7 +14,7 @@
 *
 * Returns 0 if the byte arrays are equal, 1 otherwise
 **************************************************/
-int PQCLEAN_MLKEM512_CLEAN_verify(const uint8_t *a, const uint8_t *b, size_t len) {
+int verify(const uint8_t *a, const uint8_t *b, size_t len) {
     size_t i;
     uint8_t r = 0;
 
@@ -26,7 +26,7 @@ int PQCLEAN_MLKEM512_CLEAN_verify(const uint8_t *a, const uint8_t *b, size_t len
 }
 
 /*************************************************
-* Name:        PQCLEAN_MLKEM512_CLEAN_cmov
+* Name:        cmov
 *
 * Description: Copy len bytes from x to r if b is 1;
 *              don't modify x if b is 0. Requires b to be in {0,1};
@@ -38,7 +38,7 @@ int PQCLEAN_MLKEM512_CLEAN_verify(const uint8_t *a, const uint8_t *b, size_t len
 *              size_t len:       Amount of bytes to be copied
 *              uint8_t b:        Condition bit; has to be in {0,1}
 **************************************************/
-void PQCLEAN_MLKEM512_CLEAN_cmov(uint8_t *r, const uint8_t *x, size_t len, uint8_t b) {
+void cmov(uint8_t *r, const uint8_t *x, size_t len, uint8_t b) {
     size_t i;
 
     PQCLEAN_PREVENT_BRANCH_HACK(b);
@@ -51,7 +51,7 @@ void PQCLEAN_MLKEM512_CLEAN_cmov(uint8_t *r, const uint8_t *x, size_t len, uint8
 
 
 /*************************************************
-* Name:        PQCLEAN_MLKEM512_CLEAN_cmov_int16
+* Name:        cmov_int16
 *
 * Description: Copy input v to *r if b is 1, don't modify *r if b is 0.
 *              Requires b to be in {0,1};
@@ -61,7 +61,7 @@ void PQCLEAN_MLKEM512_CLEAN_cmov(uint8_t *r, const uint8_t *x, size_t len, uint8
 *              int16_t v:        input int16_t
 *              uint8_t b:        Condition bit; has to be in {0,1}
 **************************************************/
-void PQCLEAN_MLKEM512_CLEAN_cmov_int16(int16_t *r, int16_t v, uint16_t b) {
+void cmov_int16(int16_t *r, int16_t v, uint16_t b) {
     b = -b;
     *r ^= b & ((*r) ^ v);
 }

@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "yacl/crypto/pqc/kem/ml_kem.h"
 
 #include <vector>
-
-#include "yacl/base/exception.h"
-#include "yacl/crypto/pqc/kem/common/params.h"
+// #include "yacl/base/exception.h"
+#include "ml_kem_enc.h"
+#include "common/params.h"
+#include "common/kem.h"
 
 namespace yacl::crypto {
 
@@ -32,18 +32,18 @@ namespace {
 std::vector<std::vector<uint8_t> > MLkemEncaps::Encaps()  {
     std::vector<uint8_t> ss(KYBER_SSBYTES);
     std::vector<uint8_t> ct(KYBER_CIPHERTEXTBYTES);
-    std::vector<vector<uint8_t>> out;
+    std::vector<std::vector<uint8_t>> out;
 
-    crypto_kem_enc(ct.data(), ss.data(), ek_.get());
+    crypto_kem_enc(ct.data(), ss.data(), ek_.data());
 
     out.push_back(ss);
     out.push_back(ct);
     return out;
 }
 
-std::vector<uint8_t> MLkemDecaps::Decaps(ByteContainerView ciphertext) {
-    std:vector<uint8_t> ss1;
-    crypto_kem_dec(ss1.data(), ciphertext.data(), sk_.get());
+std::vector<uint8_t> MLkemDecaps::Decaps(std::vector<uint8_t> ciphertext) {
+    std::vector<uint8_t> ss1;
+    crypto_kem_dec(ss1.data(), ciphertext.data(), dk_.data());
     return ss1;
 }
 
