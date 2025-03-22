@@ -3,9 +3,7 @@
 #include "params.h"
 #include "poly.h"
 #include "polyvec.h"
-//#include "randombytes.h"
 #include "symmetric.h"
-#include "rng.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>

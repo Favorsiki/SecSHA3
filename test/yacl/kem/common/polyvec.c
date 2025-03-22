@@ -1,6 +1,5 @@
 #include "params.h"
 #include "poly.h"
-#include "rng.h"
 #include "polyvec.h"
 #include <stdint.h>
 

@@ -1,10 +1,9 @@
 #include "indcpa.h"
 #include "kem.h"
 #include "params.h"
-//#include "randombytes.h"
+#include "randombytes.h"
 #include "symmetric.h"
 #include "verify.h"
-#include "rng.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>

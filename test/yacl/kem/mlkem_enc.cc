@@ -15,7 +15,7 @@
 
 #include <vector>
 // #include "yacl/base/exception.h"
-#include "ml_kem_enc.h"
+#include "mlkem_enc.h"
 extern "C"
 {
 #include "common/params.h"

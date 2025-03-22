@@ -5,7 +5,6 @@
 #include "reduce.h"
 #include "symmetric.h"
 #include "verify.h"
-#include "rng.h"
 #include <stdint.h>
 
 /*************************************************

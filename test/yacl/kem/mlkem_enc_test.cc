@@ -39,7 +39,7 @@ TEST(MLkemEnc, EncryptDecrypt_shouldOk) {
 
 
 
-#include "ml_kem_enc.h"
+#include "mlkem_enc.h"
 #include "key_utils.h"
 #include <stdio.h>
 
