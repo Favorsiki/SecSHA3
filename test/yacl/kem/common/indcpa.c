@@ -3,7 +3,7 @@
 #include "params.h"
 #include "poly.h"
 #include "polyvec.h"
-#include "randombytes.h"
+//#include "randombytes.h"
 #include "symmetric.h"
 #include "rng.h"
 #include <stddef.h>
@@ -82,9 +82,7 @@ static void unpack_sk(polyvec *sk, const uint8_t packedsk[KYBER_INDCPA_SECRETKEY
 **************************************************/
 static void pack_ciphertext(uint8_t r[KYBER_INDCPA_BYTES], polyvec *b, poly *v) {
     PQCLEAN_MLKEM512_CLEAN_polyvec_compress(r, b);
-    //--printBstr("CPA_c1", r, KYBER_POLYVECCOMPRESSEDBYTES);
     PQCLEAN_MLKEM512_CLEAN_poly_compress(r + KYBER_POLYVECCOMPRESSEDBYTES, v);
-    //--printBstr("CPA_c2", r+KYBER_POLYVECCOMPRESSEDBYTES, KYBER_POLYCOMPRESSEDBYTES);
 }
 
 /*************************************************
@@ -98,13 +96,8 @@ static void pack_ciphertext(uint8_t r[KYBER_INDCPA_BYTES], polyvec *b, poly *v) 
 *              - const uint8_t *c: pointer to the input serialized ciphertext
 **************************************************/
 static void unpack_ciphertext(polyvec *b, poly *v, const uint8_t c[KYBER_INDCPA_BYTES]) {
-    printf("unpack_ciphertext : \n");
-    //--printBstr("CPA_c1", c, KYBER_POLYVECCOMPRESSEDBYTES);
     PQCLEAN_MLKEM512_CLEAN_polyvec_decompress(b, c);
-    //--printCoeff("[u0]", b->vec[0].coeffs);
-    //--printBstr("CPA_c2", c+KYBER_POLYVECCOMPRESSEDBYTES, KYBER_POLYCOMPRESSEDBYTES);  
     PQCLEAN_MLKEM512_CLEAN_poly_decompress(v, c + KYBER_POLYVECCOMPRESSEDBYTES);
-    //--printCoeff("[v]", v->coeffs);    
 }
 
 /*************************************************
@@ -171,26 +164,21 @@ void PQCLEAN_MLKEM512_CLEAN_gen_matrix(polyvec *a, const uint8_t seed[KYBER_SYMB
     for (i = 0; i < KYBER_K; i++) {
         for (j = 0; j < KYBER_K; j++) {
             if (transposed) {
-                printf("CPA_AT[%d][%d]: \n", i, j);
                 xof_absorb(&state, seed, (uint8_t)i, (uint8_t)j);
             } else {
-                printf("CPA_A[%d][%d]: \n", i, j);
                 xof_absorb(&state, seed, (uint8_t)j, (uint8_t)i);
             }
 
             xof_squeezeblocks(buf, GEN_MATRIX_NBLOCKS, &state);
             buflen = GEN_MATRIX_NBLOCKS * XOF_BLOCKBYTES;
             ctr = rej_uniform(a[i].vec[j].coeffs, KYBER_N, buf, buflen);
-            //--printBstr("CPA_SHAKE128", buf, buflen);
 
             while (ctr < KYBER_N) {
                 xof_squeezeblocks(buf, 1, &state);
                 buflen = XOF_BLOCKBYTES;
-                //--printBstr("CPA_SHAKE128", buf, buflen);
                 ctr += rej_uniform(a[i].vec[j].coeffs + ctr, KYBER_N - ctr, buf, buflen);
             }
             xof_ctx_release(&state);
-            //--printCoeff("[CPA_coeffs]", a[i].vec[j].coeffs);
         }
     }
 }
@@ -220,47 +208,27 @@ void PQCLEAN_MLKEM512_CLEAN_indcpa_keypair_derand(uint8_t pk[KYBER_INDCPA_PUBLIC
 
     memcpy(buf, coins, KYBER_SYMBYTES);
     buf[KYBER_SYMBYTES] = KYBER_K;
-    //--printBstr("CPA_d", buf, KYBER_SYMBYTES);
     hash_g(buf, buf, KYBER_SYMBYTES + 1);
-
-    //--printBstr("CPA_rho", buf, KYBER_SYMBYTES);                  // buf前32字节存rho
-    //--printBstr("CPA_sigma", buf+KYBER_SYMBYTES, KYBER_SYMBYTES); // buf后32字节存sigma
   
-    printf("CPA: GenMatrix_A:\n");
     gen_a(a, publicseed);
 
     for (i = 0; i < KYBER_K; i++) {
-        printf("CPA_s[%d]: \n", i);
         PQCLEAN_MLKEM512_CLEAN_poly_getnoise_eta1(&skpv.vec[i], noiseseed, nonce++);
     }
     for (i = 0; i < KYBER_K; i++) {
-        printf("CPA_e[%d]: \n", i);
         PQCLEAN_MLKEM512_CLEAN_poly_getnoise_eta1(&e.vec[i], noiseseed, nonce++);
     }
-    printf("CPA_ntt(s):\n");
     PQCLEAN_MLKEM512_CLEAN_polyvec_ntt(&skpv);
-    printf("CPA_ntt(e):\n");
     PQCLEAN_MLKEM512_CLEAN_polyvec_ntt(&e);
 
-    printf("CPA: t=A*s+e :\n");
     // matrix-vector multiplication
     for (i = 0; i < KYBER_K; i++) {
-        printf("\t tmp = A[%d] * s:\n", i);                                // t = As
-        //--printCoeff("A?0", a[i].vec[0].coeffs);
-        //--printCoeff("A?1", a[i].vec[1].coeffs);
-        //--printCoeff("s0", skpv.vec[0].coeffs);
-        //--printCoeff("s1", skpv.vec[1].coeffs);
         PQCLEAN_MLKEM512_CLEAN_polyvec_basemul_acc_montgomery(&pkpv.vec[i], &a[i], &skpv);
         PQCLEAN_MLKEM512_CLEAN_poly_tomont(&pkpv.vec[i]);
-        //--printCoeff("tmp", pkpv.vec[i].coeffs);
     }
 
     PQCLEAN_MLKEM512_CLEAN_polyvec_add(&pkpv, &pkpv, &e);
-    //--printCoeff("CPA_t[0]",pkpv.vec[0].coeffs);
-    //--printCoeff("CPA_t[1]",pkpv.vec[1].coeffs);
     PQCLEAN_MLKEM512_CLEAN_polyvec_reduce(&pkpv);
-    //--printCoeff("CPA_t[0]_reduce",pkpv.vec[0].coeffs);
-    //--printCoeff("CPA_t[1]_reduce",pkpv.vec[1].coeffs);
 
     pack_sk(sk, &skpv);
     pack_pk(pk, &pkpv, publicseed);
@@ -293,33 +261,20 @@ void PQCLEAN_MLKEM512_CLEAN_indcpa_enc(uint8_t c[KYBER_INDCPA_BYTES],
     polyvec sp, pkpv, ep, at[KYBER_K], b;
     poly v, k, epp;
 
-    printf("CPA: t=Decode12(pk) :\n");
     unpack_pk(&pkpv, seed, pk);
-    //--printBstr("CPA_input_pk", (unsigned char*)&pk[0], KYBER_INDCPA_PUBLICKEYBYTES);
-    //--printCoeff("CPA_input_t[0]",pkpv.vec[0].coeffs);
-    //--printCoeff("CPA_input_t[1]",pkpv.vec[1].coeffs);
-    //--printBstr("CPA_input_rho", seed, KYBER_SYMBYTES);
 
-    printf("CPA: Decompress(Decode1(m),1):\n");
-    //--printBstr("CPA_input_m", (unsigned char*)&m[0], KYBER_INDCPA_MSGBYTES);
     PQCLEAN_MLKEM512_CLEAN_poly_frommsg(&k, m);
-    //--printCoeff("[CPA_poly_m]", k.coeffs);
 
     gen_at(at, seed);
 
-    for (i = 0; i < KYBER_K; i++) {
-        printf("CPA_r[%d]: \n", i);
-        //--printBstr("CPA_input_r", (unsigned char*)&coins[0], KYBER_SYMBYTES);    
+    for (i = 0; i < KYBER_K; i++) {   
         PQCLEAN_MLKEM512_CLEAN_poly_getnoise_eta1(sp.vec + i, coins, nonce++);
     }
     for (i = 0; i < KYBER_K; i++) {
-        printf("CPA_e1[%d]: \n", i);
         PQCLEAN_MLKEM512_CLEAN_poly_getnoise_eta2(ep.vec + i, coins, nonce++);
     }
-    printf("CPA_e2: \n");
     PQCLEAN_MLKEM512_CLEAN_poly_getnoise_eta2(&epp, coins, nonce++);
 
-    printf("CPA_ntt(r):\n");
     PQCLEAN_MLKEM512_CLEAN_polyvec_ntt(&sp);
 
     // matrix-vector multiplication
@@ -332,24 +287,15 @@ void PQCLEAN_MLKEM512_CLEAN_indcpa_enc(uint8_t c[KYBER_INDCPA_BYTES],
     PQCLEAN_MLKEM512_CLEAN_polyvec_invntt_tomont(&b);
     PQCLEAN_MLKEM512_CLEAN_poly_invntt_tomont(&v);
 
-    printf("CPA_u = Ar+e1 : \n");
     PQCLEAN_MLKEM512_CLEAN_polyvec_add(&b, &b, &ep);
-    //--printCoeff("CPA_u[0]",b.vec[0].coeffs);
-    //--printCoeff("CPA_u[1]",b.vec[1].coeffs); 
 
-    printf("CPA: v = invntt(tt*r)+e2+Decompress(Decode1(m),1) \n");
     PQCLEAN_MLKEM512_CLEAN_poly_add(&v, &v, &epp);
     PQCLEAN_MLKEM512_CLEAN_poly_add(&v, &v, &k);
-    //--printCoeff("CPA_v", v.coeffs);
 
     PQCLEAN_MLKEM512_CLEAN_polyvec_reduce(&b);
-    //--printCoeff("CPA_u[0]_reduce",b.vec[0].coeffs);
-    //--printCoeff("CPA_u[1]_reduce",b.vec[1].coeffs);
 
     PQCLEAN_MLKEM512_CLEAN_poly_reduce(&v);
-    //--printCoeff("CPA_v_reduce", v.coeffs);
 
-    printf("CPA_pack_ciphertext:\n");
     pack_ciphertext(c, &b, &v);
 }
 
@@ -375,7 +321,6 @@ void PQCLEAN_MLKEM512_CLEAN_indcpa_dec(uint8_t m[KYBER_INDCPA_MSGBYTES],
     unpack_ciphertext(&b, &v, c);
     unpack_sk(&skpv, sk);
 
-    printf("CPA_ntt(u):\n");
     PQCLEAN_MLKEM512_CLEAN_polyvec_ntt(&b);
     PQCLEAN_MLKEM512_CLEAN_polyvec_basemul_acc_montgomery(&mp, &skpv, &b);
     PQCLEAN_MLKEM512_CLEAN_poly_invntt_tomont(&mp);

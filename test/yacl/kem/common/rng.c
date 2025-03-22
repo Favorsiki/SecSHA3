@@ -11,32 +11,6 @@
 #include <openssl/evp.h>
 #include <openssl/err.h>
 #include <stdio.h>
-void printCoeff(char* S, const int16_t* A)
-{
-	// unsigned long long  i;
-
-	// printf("    %s : ", S);
-
-	// for ( i=0; i<256; i++ )
-	// 	printf("%d,", A[i]);
-
-	// printf("\n");
-}
-
-void printBstr(char *S, const uint8_t *A, unsigned long long L)
-{
-	// unsigned long long  i;
-
-	// printf("    [%s_%lld] = ", S, L*8);
-
-	// for ( i=0; i<L; i++ )
-	// 	printf("%02X", A[i]);
-
-	// if ( L == 0 )
-	// 	printf("00");
-
-	// printf("\n");
-}
 
 AES256_CTR_DRBG_struct  DRBG_ctx;
 

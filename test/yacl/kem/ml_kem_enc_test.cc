@@ -46,6 +46,7 @@ TEST(MLkemEnc, EncryptDecrypt_shouldOk) {
 namespace yacl::crypto {
 
   void test() {
+    int flag = 0;
     // GIVEN
     auto [ek, dk] = GenMLkemKeyPairToPemBuf();
 
@@ -57,10 +58,15 @@ namespace yacl::crypto {
     auto ss1     = dec_ctx.Decaps(c);
 
     // THEN
-    for (int i = 0; i < ss1.size(); ++i) {
-      if (ss[i] != ss1[i]) printf("MLKEM512 EXECUTION ERROR\n");
+    for (int i = 0; i < ss.size(); ++i) {
+      if (ss[i] != ss1[i]) flag = 1;
+      printf("%d ", ss[i]);
     }
-    printf("MLKEM512 EXECUTION RIGHT\n");
+    printf("\n");
+    for (int i = 0; i < ss1.size(); ++i) {
+      printf("%d ", ss1[i]);
+    }
+    if (flag) printf("\nMLKEM512 EXECUTION ERROR\n");
   }
 }
 

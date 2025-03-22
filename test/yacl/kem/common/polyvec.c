@@ -114,8 +114,6 @@ void PQCLEAN_MLKEM512_CLEAN_polyvec_frombytes(polyvec *r, const uint8_t a[KYBER_
 void PQCLEAN_MLKEM512_CLEAN_polyvec_ntt(polyvec *r) {
     unsigned int i;
     for (i = 0; i < KYBER_K; i++) {
-        printf("r[%d]:\n",i);
-        //--printCoeff("[CPA_poly_ntt_input]", r->vec[i].coeffs);
         PQCLEAN_MLKEM512_CLEAN_poly_ntt(&r->vec[i]);
     }
 }
@@ -148,20 +146,13 @@ void PQCLEAN_MLKEM512_CLEAN_polyvec_invntt_tomont(polyvec *r) {
 void PQCLEAN_MLKEM512_CLEAN_polyvec_basemul_acc_montgomery(poly *r, const polyvec *a, const polyvec *b) {
     unsigned int i;
     poly t;
-    //--printCoeff("[PWM_input_a ]", a->vec[0].coeffs);
-    //--printCoeff("[PWM_input_b ]", b->vec[0].coeffs);
     PQCLEAN_MLKEM512_CLEAN_poly_basemul_montgomery(r, &a->vec[0], &b->vec[0]);
-    //--printCoeff("[PWM_output_c]", r->coeffs);
     for (i = 1; i < KYBER_K; i++) {
-    //--printCoeff("[PWM_input_a ]", a->vec[i].coeffs);
-    //--printCoeff("[PWM_input_b ]", b->vec[i].coeffs);
         PQCLEAN_MLKEM512_CLEAN_poly_basemul_montgomery(&t, &a->vec[i], &b->vec[i]);
-    //--printCoeff("[PWM_output_c]", t.coeffs);
         PQCLEAN_MLKEM512_CLEAN_poly_add(r, r, &t);
     }
 
     PQCLEAN_MLKEM512_CLEAN_poly_reduce(r);
-    //--printCoeff("[PWA_result]", r->coeffs);
 }
 
 /*************************************************
@@ -192,9 +183,6 @@ void PQCLEAN_MLKEM512_CLEAN_polyvec_reduce(polyvec *r) {
 void PQCLEAN_MLKEM512_CLEAN_polyvec_add(polyvec *r, const polyvec *a, const polyvec *b) {
     unsigned int i;
     for (i = 0; i < KYBER_K; i++) {
-        //--printCoeff("[Ar]", a->vec[i].coeffs);
-        //--printCoeff("[e2]", b->vec[i].coeffs);
         PQCLEAN_MLKEM512_CLEAN_poly_add(&r->vec[i], &a->vec[i], &b->vec[i]);
-        //--printCoeff("[u ]", b->vec[i].coeffs);
     }
 }

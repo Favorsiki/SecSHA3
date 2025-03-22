@@ -54,11 +54,9 @@ randombytes_init(unsigned char *entropy_input,
                  unsigned char *personalization_string,
                  int security_strength);
 
-// int
-// randombytes(unsigned char *x, unsigned long long xlen);
+int
+randombytes(unsigned char *x, unsigned long long xlen);
 
-void printBstr(char *S, const uint8_t *A, unsigned long long L);
-void printCoeff(char* S, const int16_t* A);
 #ifdef __cplusplus
 }
 #endif

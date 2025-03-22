@@ -1,7 +1,7 @@
 #include "indcpa.h"
 #include "kem.h"
 #include "params.h"
-#include "randombytes.h"
+//#include "randombytes.h"
 #include "symmetric.h"
 #include "verify.h"
 #include "rng.h"
@@ -29,12 +29,9 @@ int PQCLEAN_MLKEM512_CLEAN_crypto_kem_keypair_derand(uint8_t *pk,
     PQCLEAN_MLKEM512_CLEAN_indcpa_keypair_derand(pk, sk, coins);
     memcpy(sk + KYBER_INDCPA_SECRETKEYBYTES, pk, KYBER_PUBLICKEYBYTES);
     hash_h(sk + KYBER_SECRETKEYBYTES - 2 * KYBER_SYMBYTES, pk, KYBER_PUBLICKEYBYTES);
-    printf("kem_keypair:\n");
-    //--printBstr("kem_ek", pk, KYBER_PUBLICKEYBYTES);
-    //--printBstr("kem_H(ek)", sk+KYBER_SECRETKEYBYTES-2*KYBER_SYMBYTES, KYBER_SYMBYTES);  
+
     /* Value z for pseudo-random output on reject */
     memcpy(sk + KYBER_SECRETKEYBYTES - KYBER_SYMBYTES, coins + KYBER_SYMBYTES, KYBER_SYMBYTES);
-    //--printBstr("kem_z", sk+KYBER_SECRETKEYBYTES-KYBER_SYMBYTES, KYBER_SYMBYTES);
     return 0;
 }
 
@@ -88,15 +85,11 @@ int PQCLEAN_MLKEM512_CLEAN_crypto_kem_enc_derand(uint8_t *ct,
 
     /* Multitarget countermeasure for coins + contributory KEM */
     hash_h(buf + KYBER_SYMBYTES, pk, KYBER_PUBLICKEYBYTES);
-    //--printBstr("kem_H(ek)", buf + KYBER_SYMBYTES, KYBER_SYMBYTES);
 
     hash_g(kr, buf, 2 * KYBER_SYMBYTES);
-    //--printBstr("kem_K'", kr, KYBER_SYMBYTES);
-    //--printBstr("kem_r", kr+KYBER_SYMBYTES, KYBER_SYMBYTES);  
 
     /* coins are in kr+KYBER_SYMBYTES */
     PQCLEAN_MLKEM512_CLEAN_indcpa_enc(ct, buf, pk, kr + KYBER_SYMBYTES);
-    //--printBstr("kem_c", ct, KYBER_CIPHERTEXTBYTES);
 
     memcpy(ss, kr, KYBER_SYMBYTES);
     return 0;
@@ -122,7 +115,6 @@ int PQCLEAN_MLKEM512_CLEAN_crypto_kem_enc(uint8_t *ct,
         const uint8_t *pk) {
     uint8_t coins[KYBER_SYMBYTES];
     randombytes(coins, KYBER_SYMBYTES);
-    //--printBstr("kem_enc_m", coins, KYBER_SYMBYTES);
     PQCLEAN_MLKEM512_CLEAN_crypto_kem_enc_derand(ct, ss, pk, coins);
     return 0;
 }
@@ -154,35 +146,22 @@ int PQCLEAN_MLKEM512_CLEAN_crypto_kem_dec(uint8_t *ss,
     uint8_t cmp[KYBER_CIPHERTEXTBYTES + KYBER_SYMBYTES];
     const uint8_t *pk = sk + KYBER_INDCPA_SECRETKEYBYTES;
 
-    printf("KEM: KYBER.CPAPKE.Dec(dk,c) : \n");
     PQCLEAN_MLKEM512_CLEAN_indcpa_dec(buf, ct, sk);
-    //--printBstr("KEM: m'", buf, KYBER_SYMBYTES);
     /* Multitarget countermeasure for coins + contributory KEM */
   
-    printf("KEM: G(m'||h) : \n");
     memcpy(buf + KYBER_SYMBYTES, sk + KYBER_SECRETKEYBYTES - 2 * KYBER_SYMBYTES, KYBER_SYMBYTES);
     hash_g(kr, buf, 2 * KYBER_SYMBYTES);
-    //--printBstr("KEM: m'||h", buf, 2*KYBER_SYMBYTES);
-    //--printBstr("KEM: K_'", kr, KYBER_SYMBYTES);
-    //--printBstr("KEM: r'", kr+KYBER_SYMBYTES, KYBER_SYMBYTES);
 
-    printf("KEM: c' = KYBER.CPAPKE.Enc(pk,m',r') : \n");
     /* coins are in kr+KYBER_SYMBYTES */
     PQCLEAN_MLKEM512_CLEAN_indcpa_enc(cmp, buf, pk, kr + KYBER_SYMBYTES);
 
-    printf("KEM: compare c' and c : \n");
     fail = PQCLEAN_MLKEM512_CLEAN_verify(ct, cmp, KYBER_CIPHERTEXTBYTES);
-    printf("KEM: fail = %d\n", fail);
 
     /* Compute rejection key */
-    printf("KEM: K- =J(z||c) : \n");
     rkprf(ss, sk + KYBER_SECRETKEYBYTES - KYBER_SYMBYTES, ct);
-    //--printBstr("KEM : K-", ss, KYBER_SYMBYTES);
  
     /* Copy true key to return buffer if fail is false */
     PQCLEAN_MLKEM512_CLEAN_cmov(ss, kr, KYBER_SYMBYTES, (uint8_t) (1 - fail));
-    printf("Final K:\n");
-    //--printBstr("KEM : K", ss, KYBER_SYMBYTES);
 
     return 0;
 }

@@ -125,8 +125,6 @@ void PQCLEAN_MLKEM512_CLEAN_poly_frommsg(poly *r, const uint8_t msg[KYBER_INDCPA
             PQCLEAN_MLKEM512_CLEAN_cmov_int16(r->coeffs + 8 * i + j, ((KYBER_Q + 1) / 2), (msg[i] >> j) & 1);
         }
     }
-    //--printBstr("msg_input", (unsigned char *)msg, KYBER_INDCPA_MSGBYTES);
-    //--printCoeff("[poly_frommsg]", r->coeffs);
 }
 
 /*************************************************
@@ -140,7 +138,6 @@ void PQCLEAN_MLKEM512_CLEAN_poly_frommsg(poly *r, const uint8_t msg[KYBER_INDCPA
 void PQCLEAN_MLKEM512_CLEAN_poly_tomsg(uint8_t msg[KYBER_INDCPA_MSGBYTES], const poly *a) {
     unsigned int i, j;
     uint32_t t;
-    //--printCoeff("[poly_tomsg]", a->coeffs);
 
     for (i = 0; i < KYBER_N / 8; i++) {
         msg[i] = 0;
@@ -156,7 +153,6 @@ void PQCLEAN_MLKEM512_CLEAN_poly_tomsg(uint8_t msg[KYBER_INDCPA_MSGBYTES], const
             msg[i] |= t << j;
         }
     }
-    //--printBstr("msg_result", (unsigned char *)msg, KYBER_INDCPA_MSGBYTES);
 }
 
 /*************************************************
@@ -173,12 +169,8 @@ void PQCLEAN_MLKEM512_CLEAN_poly_tomsg(uint8_t msg[KYBER_INDCPA_MSGBYTES], const
 **************************************************/
 void PQCLEAN_MLKEM512_CLEAN_poly_getnoise_eta1(poly *r, const uint8_t seed[KYBER_SYMBYTES], uint8_t nonce) {
     uint8_t buf[KYBER_ETA1 * KYBER_N / 4];
-    printf("CPA_prf:\n");
     prf(buf, sizeof(buf), seed, nonce);
-    printf("CPA_cbd1:\n");
     PQCLEAN_MLKEM512_CLEAN_poly_cbd_eta1(r, buf);
-    //--printBstr("CPA_cbd1_input", buf, sizeof(buf));
-    //--printCoeff("[CPA_cbd1_output]", r->coeffs);
 }
 
 /*************************************************
@@ -195,12 +187,8 @@ void PQCLEAN_MLKEM512_CLEAN_poly_getnoise_eta1(poly *r, const uint8_t seed[KYBER
 **************************************************/
 void PQCLEAN_MLKEM512_CLEAN_poly_getnoise_eta2(poly *r, const uint8_t seed[KYBER_SYMBYTES], uint8_t nonce) {
     uint8_t buf[KYBER_ETA2 * KYBER_N / 4];
-    printf("CPA_prf:\n");
     prf(buf, sizeof(buf), seed, nonce);
-    printf("CPA_cbd2:\n");
     PQCLEAN_MLKEM512_CLEAN_poly_cbd_eta2(r, buf);
-    //--printBstr("CPA_cbd2_input", buf, sizeof(buf));
-    //--printCoeff("[CPA_cbd2_output]", r->coeffs);
 }
 
 
@@ -215,9 +203,7 @@ void PQCLEAN_MLKEM512_CLEAN_poly_getnoise_eta2(poly *r, const uint8_t seed[KYBER
 **************************************************/
 void PQCLEAN_MLKEM512_CLEAN_poly_ntt(poly *r) {
     PQCLEAN_MLKEM512_CLEAN_ntt(r->coeffs);
-    //--printCoeff("[CPA_poly_ntt_output]", r->coeffs);
     PQCLEAN_MLKEM512_CLEAN_poly_reduce(r);
-    //--printCoeff("[CPA_poly_ntt_output_reduce]", r->coeffs);
 }
 
 /*************************************************
@@ -231,7 +217,6 @@ void PQCLEAN_MLKEM512_CLEAN_poly_ntt(poly *r) {
 **************************************************/
 void PQCLEAN_MLKEM512_CLEAN_poly_invntt_tomont(poly *r) {
     PQCLEAN_MLKEM512_CLEAN_invntt(r->coeffs);
-    //--printCoeff("[CPA_poly_invntt_output]", r->coeffs);
 }
 
 /*************************************************
