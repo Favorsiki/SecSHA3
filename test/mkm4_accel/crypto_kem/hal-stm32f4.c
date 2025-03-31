@@ -10,7 +10,39 @@
 #include <libopencm3/cm3/systick.h>
 
 
-// 24 MHz
+*/
+void hal_setup(const enum clock_mode clock)
+{
+//  clock_setup(clock);
+//  gpio_setup();
+//  usart_setup(115200);
+//  systick_setup();
+//  rng_enable();
+}
+void hal_send_str(const char* in)
+{
+  //send_USART_str(in);
+}
+
+//static volatile unsigned long long overflowcnt = 0;
+//void sys_tick_handler(void)
+//{
+//  ++overflowcnt;
+//}
+uint64_t hal_get_time()
+{
+//  while (true) {
+//    unsigned long long before = overflowcnt;
+//    unsigned long long result = (before + 1) * 16777216llu - systick_get_value();
+//    if (overflowcnt == before) {
+//      return result;
+//    }
+//  }
+	XTime ans;
+	XTime_GetTime(&ans);
+	return ans;
+}
+
 const struct rcc_clock_scale benchmarkclock = {
   .pllm = 8, //VCOin = HSE / PLLM = 1 MHz
   .plln = 192, //VCOout = VCOin * PLLN = 192 MHz
@@ -81,37 +113,4 @@ static void send_USART_str(const char* in)
     usart_send_blocking(USART2, *(unsigned char *)(in+i));
   }
   usart_send_blocking(USART2, '\n');
-}
-
-*/
-void hal_setup(const enum clock_mode clock)
-{
-//  clock_setup(clock);
-//  gpio_setup();
-//  usart_setup(115200);
-//  systick_setup();
-//  rng_enable();
-}
-void hal_send_str(const char* in)
-{
-  //send_USART_str(in);
-}
-
-//static volatile unsigned long long overflowcnt = 0;
-//void sys_tick_handler(void)
-//{
-//  ++overflowcnt;
-//}
-uint64_t hal_get_time()
-{
-//  while (true) {
-//    unsigned long long before = overflowcnt;
-//    unsigned long long result = (before + 1) * 16777216llu - systick_get_value();
-//    if (overflowcnt == before) {
-//      return result;
-//    }
-//  }
-	XTime ans;
-	XTime_GetTime(&ans);
-	return ans;
 }
