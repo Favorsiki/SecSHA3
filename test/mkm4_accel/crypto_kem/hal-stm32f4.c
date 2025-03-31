@@ -13,31 +13,31 @@
 */
 void hal_setup(const enum clock_mode clock)
 {
-//  clock_setup(clock);
-//  gpio_setup();
-//  usart_setup(115200);
-//  systick_setup();
-//  rng_enable();
+ clock_setup(clock);
+ gpio_setup();
+ usart_setup(115200);
+ systick_setup();
+ rng_enable();
 }
 void hal_send_str(const char* in)
 {
-  //send_USART_str(in);
+  send_USART_str(in);
 }
 
-//static volatile unsigned long long overflowcnt = 0;
-//void sys_tick_handler(void)
-//{
-//  ++overflowcnt;
-//}
+static volatile unsigned long long overflowcnt = 0;
+void sys_tick_handler(void)
+{
+ ++overflowcnt;
+}
 uint64_t hal_get_time()
 {
-//  while (true) {
-//    unsigned long long before = overflowcnt;
-//    unsigned long long result = (before + 1) * 16777216llu - systick_get_value();
-//    if (overflowcnt == before) {
-//      return result;
-//    }
-//  }
+ while (true) {
+   unsigned long long before = overflowcnt;
+   unsigned long long result = (before + 1) * 16777216llu - systick_get_value();
+   if (overflowcnt == before) {
+     return result;
+   }
+ }
 	XTime ans;
 	XTime_GetTime(&ans);
 	return ans;

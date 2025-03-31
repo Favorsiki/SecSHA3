@@ -29,6 +29,21 @@ unsigned long long poly_dec_cycles;
 unsigned long long rng_cycles;
 unsigned long long rng_calls = 0;
 
+unsigned long long cbd_cycles_r1;
+unsigned long long xof_cycles_r1;
+unsigned long long enc_cycles_r1;
+unsigned long long dec_cycles_r1;
+unsigned long long g_cycles_r1;
+unsigned long long A2A_10_1_cycles_r1;
+unsigned long long A2A_13_10_cycles_r1;
+unsigned long long A2A_10_4_cycles_r1;
+unsigned long long gen_A_cycles_r1;
+unsigned long long mask_comp_cycles_r1;
+unsigned long long poly_enc_cycles_r1;
+unsigned long long poly_dec_cycles_r1;
+unsigned long long rng_cycles_r1;
+unsigned long long rng_calls_r1 = 0;
+
 bool trigger = false;
 uint8_t en_rand = 1;
 
@@ -217,11 +232,64 @@ int main () { // 559310 cycles(50MHZ)  375354 cycles(100MHZ)
     // [57] : h_mode=B , len =0x40 (kdf)
     mask_sha3(out_1, out_2, 32, buf_1, buf_2, 0x40, SHAKE256_MASK, SHAKE256_RATE);
 
+
+    // [1] : h_mode=B , len =0x21 (cbd_e)
+    mask_sha3(out_1, out_2, SHAKE256_RATE, buf_1, buf_2, 0x21, SHAKE256_MASK, SHAKE256_RATE);
+
+    // [2] : h_mode=2 , len =0x22 (xof_absorb)
+    unmk_sha3(out_1, 3*SHAKE128_RATE, buf_1, 0x22, SHAKE128, SHAKE128_RATE);
+
+    // [3] : h_mode=2 , len =0x22 (xof_absorb)
+    unmk_sha3(out_1, 3*SHAKE128_RATE, buf_1, 0x22, SHAKE128, SHAKE128_RATE);
+
+    // [4] : h_mode=2 , len =0x22 (xof_absorb)
+    unmk_sha3(out_1, 3*SHAKE128_RATE, buf_1, 0x22, SHAKE128, SHAKE128_RATE);
+
+    // [5] : h_mode=B , len =0x21 (cbd_e)
+    mask_sha3(out_1, out_2, SHAKE256_RATE, buf_1, buf_2, 0x21, SHAKE256_MASK, SHAKE256_RATE);
+
+    // [6] : h_mode=2 , len =0x22 (xof_absorb)
+    unmk_sha3(out_1, 3*SHAKE128_RATE, buf_1, 0x22, SHAKE128, SHAKE128_RATE);
+
+    // [7] : h_mode=2 , len =0x22 (xof_absorb)
+    unmk_sha3(out_1, 3*SHAKE128_RATE, buf_1, 0x22, SHAKE128, SHAKE128_RATE);
+
+    // [8] : h_mode=2 , len =0x22 (xof_absorb)
+    unmk_sha3(out_1, 3*SHAKE128_RATE, buf_1, 0x22, SHAKE128, SHAKE128_RATE);
+
+    // [9] : h_mode=B , len =0x21 (cbd_e)
+    mask_sha3(out_1, out_2, SHAKE256_RATE, buf_1, buf_2, 0x21, SHAKE256_MASK, SHAKE256_RATE);
+
+    // [10] : h_mode=0 , len =0x4a0 (h_pk)
+    unmk_sha3(out_1, 32, buf_1, 0x4a0, SHA3_256, SHA3_256_RATE);
+
+    // [11] : h_mode=0 , len =0x20 (h_m)
+    unmk_sha3(out_1, 32, buf_1, 0x20, SHA3_256, SHA3_256_RATE);
+
+    // [12] : h_mode=0 , len =0x4a0 (h_pk)
+    unmk_sha3(out_1, 32, buf_1, 0x4a0, SHA3_256, SHA3_256_RATE);
+
+    // [13] : h_mode=1 , len =0x40 (g)
+    unmk_sha3(out_1, 64, buf_1, 0x40, SHA3_512, SHA3_512_RATE);
+
+    // [14] : h_mode=3 , len =0x21 (cbd_r)
+    unmk_sha3(out_1, SHAKE256_RATE, buf_1, 0x21, SHAKE256, SHAKE256_RATE);
+
+    // [15] : h_mode=3 , len =0x21 (cbd_r)
+    unmk_sha3(out_1, SHAKE256_RATE, buf_1, 0x21, SHAKE256, SHAKE256_RATE);
+
+    // [16] : h_mode=3 , len =0x21 (cbd_r)
+    unmk_sha3(out_1, SHAKE256_RATE, buf_1, 0x21, SHAKE256, SHAKE256_RATE);
+
+    
 	t1 = hal_get_time();
 	t1 = t1 - t0;
 	h1 = t1&0xffffffff;
 	xil_printf("over : %lu\n\r", h1);
 
     dma_cleanup();
+    // -----------
+    
+
     return 0;
 }
