@@ -49,23 +49,24 @@ shake128_inc
 
 */
 void unmk_sha3(uint8_t *output, size_t outlen, const uint8_t *input, size_t inlen, int h_mode, int rate);
-void mask_sha3(uint8_t *output1, uint8_t *output2, size_t outlen, const uint8_t *input1, const uint8_t *input2, size_t inlen, int h_mode, int rate);
 void unmk_sha3_inc_init(int h_mode);
 void unmk_sha3_inc_absorb(const uint8_t* input, size_t inlen, int h_mode);
 void unmk_sha3_inc_padding(int h_mode);
 void unmk_sha3_inc_squeeze(uint8_t* output, int outlen, int h_mode, int rate);
+void unmk_sha3_512(uint8_t *output, const uint8_t *input, size_t inlen);
+void unmk_sha3_256(uint8_t *output, const uint8_t *input, size_t inlen);
+void unmk_shake256(uint8_t *output, int outlen, const uint8_t *input, size_t inlen);
+void unmk_shake128(uint8_t *output, int outlen, const uint8_t *input, size_t inlen);
+
+
+void mask_sha3(uint8_t *output1, uint8_t *output2, size_t outlen, const uint8_t *input1, const uint8_t *input2, size_t inlen, int h_mode, int rate);
 void mask_sha3_inc_init(int h_mode);
 void mask_sha3_inc_absorb(const uint8_t* input1, const uint8_t* input2, size_t inlen, int h_mode);
 void mask_sha3_inc_padding(int h_mode);
 void mask_sha3_inc_squeeze(uint8_t* output1, uint8_t* output2, int outlen, int h_mode, int rate);
-
-void unmk_sha3_512(uint8_t *output, const uint8_t *input, size_t inlen);
 void mask_sha3_512(uint8_t *output1, uint8_t *output2, const uint8_t *input1, const uint8_t *input2, size_t inlen);
-void unmk_sha3_256(uint8_t *output, const uint8_t *input, size_t inlen);
 void mask_sha3_256(uint8_t *output1, uint8_t *output2, const uint8_t *input1, const uint8_t *input2, size_t inlen);
-void unmk_shake256(uint8_t *output, int outlen, const uint8_t *input, size_t inlen);
 void mask_shake256(uint8_t *output1, uint8_t *output2, size_t outlen, const uint8_t *input1, const uint8_t *input2, size_t inlen);
-void unmk_shake128(uint8_t *output, int outlen, const uint8_t *input, size_t inlen);
 
 
 
