@@ -21,9 +21,10 @@
 
 ​         In the Vivado, the platform is connected as shown in the following figure.
 
-
 ![Diagram Png](/img/diagram.png)
 
+
+![Resource Png](/img/fpga.png)
 
 ##### 2.4 compile software (PS)
 
